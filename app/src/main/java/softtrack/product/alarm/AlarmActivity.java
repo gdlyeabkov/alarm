@@ -1,10 +1,14 @@
 package softtrack.product.alarm;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Switch;
@@ -101,6 +105,27 @@ public class AlarmActivity extends Fragment {
             newAlarm.addView(newAlarmDateAndIsEnabled);
             alarms.addView(newAlarm);
         }
+        Button addAlarmBtn = getActivity().findViewById(R.id.addAlarmBtn);
+        addAlarmBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), AddAlarmActivity.class);
+                intent.putExtra("filesType", "none");
+                intent.putExtra("currentPath", getActivity().getApplicationContext().getCacheDir().getPath());
+                getActivity().startActivity(intent);
+            }
+        });
+        Button alarmsContextMenuBtn = getActivity().findViewById(R.id.alarmsContextMenuBtn);
+        alarmsContextMenuBtn.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+            @Override
+            public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+                contextMenu.add(Menu.NONE, 101, Menu.NONE, "Открыть");
+                contextMenu.add(Menu.NONE, 102, Menu.NONE, "Открыть");
+                contextMenu.add(Menu.NONE, 103, Menu.NONE, "Открыть");
+                contextMenu.add(Menu.NONE, 104, Menu.NONE, "Открыть");
+                contextMenu.add(Menu.NONE, 105, Menu.NONE, "Открыть");
+            }
+        });
     }
 
 }
