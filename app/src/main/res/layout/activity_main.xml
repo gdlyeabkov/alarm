@@ -7,6 +7,51 @@
     android:background="#E6E6E6"
     tools:context=".MainActivity">
 
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/mainTabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:translationY="275dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/alarmTabItem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Будильник" />
+
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/worldTimeTabItem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Мировое время" />
+
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/stopWatchTabItem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Секундомер" />
+
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/timerTabItem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Таймер" />
+    </com.google.android.material.tabs.TabLayout>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/currentTab"
+        android:layout_width="match_parent"
+        android:layout_height="550dp"
+        android:translationY="150dp"
+        app:layout_constraintBottom_toTopOf="@+id/mainTabs"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/alarmsScroll"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/alarmsTitle"
         android:layout_width="0dp"
@@ -15,6 +60,7 @@
         android:textAlignment="center"
         android:textSize="30sp"
         android:translationY="50dp"
+        android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/alarmsScroll"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -26,6 +72,7 @@
         android:layout_height="35dp"
         android:orientation="horizontal"
         android:translationY="125dp"
+        android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/alarmsScroll"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -76,6 +123,7 @@
         android:layout_width="match_parent"
         android:layout_height="250dp"
         android:translationY="200dp"
+        android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/tabsLabels"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -97,6 +145,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:translationY="275dp"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

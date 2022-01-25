@@ -1,11 +1,23 @@
 package softtrack.product.alarm;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.WindowDecorActionBar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.lifecycle.Lifecycle;
+import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
@@ -13,102 +25,50 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.google.android.material.tabs.TabItem;
+import com.google.android.material.tabs.TabLayout;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
+@SuppressWarnings("ALL")
 public class MainActivity extends AppCompatActivity {
 
     public LinearLayout tabsLabels;
-    public ArrayList<HashMap<String, Object>> havedAlarms;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        tabsLabels = findViewById(R.id.tabsLabels);
-        TextView alarmTabLabel = findViewById(R.id.alarmTabLabel);
-        TextView worldTabLabel = findViewById(R.id.worldTabLabel);
-        TextView stopwatchTabLabel = findViewById(R.id.stopwatchTabLabel);
-        TextView timerTabLabel = findViewById(R.id.timerTabLabel);
-        LinearLayout alarms = findViewById(R.id.alarms);
-        alarmTabLabel.setOnClickListener(new View.OnClickListener() {
+        TabLayout tabs = findViewById(R.id.mainTabs);
+        ViewPager2 viewPager = findViewById(R.id.currentTab);
+        FragmentManager fm = getSupportFragmentManager();
+        ViewStateAdapter sa = new ViewStateAdapter(fm, getLifecycle());
+        viewPager.setAdapter(sa);
+        tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
-            public void onClick(View view) {
-                toggleTabHandler(view);
+            public void onTabSelected(TabLayout.Tab tab) {
+                viewPager.setCurrentItem(tab.getPosition());
             }
-        });
-        worldTabLabel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggleTabHandler(view);
-            }
-        });
-        stopwatchTabLabel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggleTabHandler(view);
-            }
-        });
-        timerTabLabel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggleTabHandler(view);
-            }
-        });
 
-        havedAlarms = new ArrayList<HashMap<String, Object>>();
-        HashMap<String, Object> firstAlarm = new HashMap<String, Object>();
-        firstAlarm.put("time", "17:30");
-        firstAlarm.put("date", "2022-01-01");
-        firstAlarm.put("isEnabled", true);
-        havedAlarms.add(firstAlarm);
-        HashMap<String, Object> secondAlarm = new HashMap<String, Object>();
-        secondAlarm.put("time", "17:30");
-        secondAlarm.put("date", "2022-01-01");
-        secondAlarm.put("isEnabled", true);
-        havedAlarms.add(secondAlarm);
-        HashMap<String, Object> thirdAlarm = new HashMap<String, Object>();
-        thirdAlarm.put("time", "17:30");
-        thirdAlarm.put("date", "2022-01-01");
-        thirdAlarm.put("isEnabled", true);
-        havedAlarms.add(thirdAlarm);
-        HashMap<String, Object> fourthAlarm = new HashMap<String, Object>();
-        fourthAlarm.put("time", "17:30");
-        fourthAlarm.put("date", "2022-01-01");
-        fourthAlarm.put("isEnabled", true);
-        havedAlarms.add(fourthAlarm);
-        for (HashMap<String, Object> alarm : havedAlarms) {
-            LinearLayout newAlarm = new LinearLayout(MainActivity.this);
-            newAlarm.setBackgroundColor(Color.rgb(255, 255, 255));
-            LinearLayout.LayoutParams newAlarmLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 250);
-            newAlarmLayoutParams.setMargins(0, 5, 0,5);
-            newAlarm.setLayoutParams(newAlarmLayoutParams);
-            newAlarm.setOrientation(LinearLayout.HORIZONTAL);
-            TextView newAlarmTime = new TextView(MainActivity.this);
-            Object rawAlarmTime = alarm.get("time");
-            String alarmTime = rawAlarmTime.toString();
-            newAlarmTime.setText(alarmTime);
-            LinearLayout.LayoutParams newAlarmTimeLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
-            newAlarmTimeLayoutParams.setMargins(50, 0, 0, 0);
-            newAlarmTime.setLayoutParams(newAlarmTimeLayoutParams);
-            newAlarm.addView(newAlarmTime);
-            Switch newAlarmDateAndIsEnabled = new Switch(MainActivity.this);
-            Object rawAlarmDate = alarm.get("date");
-            String alarmDate = rawAlarmDate.toString();
-            newAlarmDateAndIsEnabled.setText(alarmDate);
-            newAlarmDateAndIsEnabled.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    // переключение будильника
-                }
-            });
-            LinearLayout.LayoutParams newAlarmDateAndIsEnabledLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
-            newAlarmDateAndIsEnabledLayoutParams.setMargins(800, 0, 0, 0);
-            newAlarmDateAndIsEnabled.setLayoutParams(newAlarmDateAndIsEnabledLayoutParams);
-            newAlarm.addView(newAlarmDateAndIsEnabled);
-            alarms.addView(newAlarm);
-        }
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                tabs.selectTab(tabs.getTabAt(position));
+            }
+        });
 
     }
 
@@ -128,6 +88,35 @@ public class MainActivity extends AppCompatActivity {
                 tabTypeface = Typeface.DEFAULT;
                 tab.setTypeface(tabTypeface, Typeface.NORMAL);
             }
+        }
+    }
+
+    private class ViewStateAdapter extends FragmentStateAdapter {
+
+        public ViewStateAdapter(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle) {
+            super(fragmentManager, lifecycle);
+        }
+
+        @NonNull
+        @Override
+        public Fragment createFragment(int position) {
+            // Hardcoded in this order, you'll want to use lists and make sure the titles match
+            if (position == 0) {
+                return new AlarmActivity();
+            } else if (position == 1) {
+                return new WorldTimeActivity();
+            } else if (position == 2) {
+                return new StopWatchActivity();
+            } else if (position == 3) {
+                return new TimerActivity();
+            }
+            return new AlarmActivity();
+        }
+
+        @Override
+        public int getItemCount() {
+            // Hardcoded, use lists
+            return 4;
         }
     }
 
