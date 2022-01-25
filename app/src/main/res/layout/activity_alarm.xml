@@ -5,60 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/alarmsBtns"
-        android:layout_width="match_parent"
-        android:layout_height="35dp"
-        android:orientation="horizontal"
-        android:translationY="125dp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@+id/alarmsScroll"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/alarmsTitle">
-
-        <LinearLayout
-            android:id="@+id/mockAlarmsContainer"
-            android:layout_width="250dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="horizontal"></LinearLayout>
-
-        <Button
-            android:id="@+id/addAlarmBtn"
-            tools:ignore="TouchTargetSizeCheck"
-            android:layout_width="25sp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="#00FFFFFF"
-            android:backgroundTint="#00F80000"
-            android:shadowColor="#00FFFFFF"
-            android:shadowDx="0"
-            android:shadowDy="0"
-            android:shadowRadius="0"
-            android:text="+"
-            android:textAlignment="center"
-            android:textColor="#000000" />
-
-        <Button
-            android:id="@+id/alarmContextMenuBtn"
-            tools:ignore="TouchTargetSizeCheck"
-            android:layout_width="25sp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="#00FFFFFF"
-            android:backgroundTint="#00F80000"
-            android:shadowColor="#00FFFFFF"
-            android:shadowDx="0"
-            android:shadowDy="0"
-            android:shadowRadius="0"
-            android:text="⫶"
-            android:textAlignment="center"
-            android:textColor="#000000" />
-    </LinearLayout>
-
     <TextView
-        android:id="@+id/alarmsTitle2"
+        android:id="@+id/alarmsTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Все будильники\nотключены"
@@ -70,6 +18,58 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/worldTimeBtns"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:translationY="125dp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/alarmsScroll"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/alarmsTitle">
+
+        <LinearLayout
+            android:id="@+id/mockWorldTimeContainer"
+            android:layout_width="250dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal"></LinearLayout>
+
+        <Button
+            android:id="@+id/addWorldTimeBtn"
+            android:layout_width="25sp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="#00FFFFFF"
+            android:backgroundTint="#00F80000"
+            android:shadowColor="#00FFFFFF"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="0"
+            android:text="+"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <Button
+            android:id="@+id/worldTimeContextMenuBtn"
+            android:layout_width="25sp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="#00FFFFFF"
+            android:backgroundTint="#00F80000"
+            android:shadowColor="#00FFFFFF"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="0"
+            android:text="⫶"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            tools:ignore="TouchTargetSizeCheck" />
+    </LinearLayout>
 
     <ScrollView
         android:id="@+id/alarmsScroll"

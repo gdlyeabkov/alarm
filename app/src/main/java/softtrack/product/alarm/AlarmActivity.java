@@ -29,7 +29,7 @@ public class AlarmActivity extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        redrawAlarms();
+        // redrawAlarms();
 
     }
 
@@ -37,8 +37,14 @@ public class AlarmActivity extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_alarm, container, false);
-        redrawAlarms();
+        // redrawAlarms();
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        redrawAlarms();
     }
 
     public void redrawAlarms() {
