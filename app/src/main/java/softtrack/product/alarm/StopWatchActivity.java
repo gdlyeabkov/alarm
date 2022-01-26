@@ -125,7 +125,7 @@ public class StopWatchActivity  extends Fragment {
                             String currentTime = updatedHoursText + ":" + updatedMinutesText + ":" + updatedSecondsText;
                             title.setText(currentTime);
                         }
-                    },0,millisecondsInSecond);
+                    },0, millisecondsInSecond);
                 } else {
                     stopTimer();
                 }
