@@ -7,6 +7,7 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.media.Image;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -14,6 +15,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -53,6 +55,7 @@ public class WorldTimeActivity  extends Fragment {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), AddCityActivity.class);
+                intent.putExtra("id", "0");
                 getActivity().startActivity(intent);
             }
         });
@@ -98,10 +101,51 @@ public class WorldTimeActivity  extends Fragment {
                 newCity.setBackgroundColor(newCityBackgroundColor);
                 TextView cityName = new TextView(getActivity());
                 Object rawCityNameContent = city.get("name");
+                LinearLayout newCityAside = new LinearLayout(getActivity());
+                LinearLayout.LayoutParams newCityAsideLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                newCityAsideLayoutParams.setMargins(20, 10, 0, 0);
+                newCityAside.setLayoutParams(newCityAsideLayoutParams);
+                newCityAside.setOrientation(LinearLayout.VERTICAL);
+                newCity.addView(newCityAside);
                 String cityNameContent = rawCityNameContent.toString();
                 cityName.setText(cityNameContent);
-                newCity.addView(cityName);
+                newCityAside.addView(cityName);
+                TextView cityTimeDiff = new TextView(getActivity());
+                cityTimeDiff.setText("На 2 часа раньше");
+                newCityAside.addView(cityTimeDiff);
+                TextView newCityTime = new TextView(getActivity());
+                newCityTime.setText("16:00");
+                newCityTime.setTextSize(24);
+                LinearLayout.LayoutParams newCityTimeLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                newCityTimeLayoutParams.setMargins(500, 10, 0, 0);
+                newCityTime.setLayoutParams(newCityTimeLayoutParams);
+                newCity.addView(newCityTime);
+                LinearLayout newCityWheather = new LinearLayout(getActivity());
+                newCityWheather.setOrientation(LinearLayout.VERTICAL);
+                LinearLayout.LayoutParams newCityWheatherLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                newCityWheatherLayoutParams.setMargins(100, 10, 0, 0);
+                newCityWheather.setLayoutParams(newCityWheatherLayoutParams);
+                ImageView newCityWheatherIcon = new ImageView(getActivity());
+                LinearLayout.LayoutParams newCityWheatherIconLayoutParams = new LinearLayout.LayoutParams(100, 100);
+                newCityWheatherIcon.setLayoutParams(newCityWheatherIconLayoutParams);
+                newCityWheatherIcon.setImageResource(R.drawable.weather);
+                newCityWheather.addView(newCityWheatherIcon);
+                TextView newCityWheatherLabel = new TextView(getActivity());
+                newCityWheatherLabel.setText("2°");
+                newCityWheather.addView(newCityWheatherLabel);
+                newCity.addView(newCityWheather);
                 cities.addView(newCity);
+                Object rawCityId = city.get("id");
+                String cityId = rawCityId.toString();
+                newCity.setContentDescription(cityId);
+                newCity.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(getActivity(), AddCityActivity.class);
+                        intent.putExtra("id", cityId);
+                        getActivity().startActivity(intent);
+                    }
+                });
             }
         } else {
             TextView notFoundCitiesLabel = new TextView(getActivity());

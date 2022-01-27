@@ -24,13 +24,16 @@
         android:id="@+id/alarmsBtns"
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:clickable="false"
         android:orientation="horizontal"
-        android:translationY="125dp"
+        android:translationY="225dp"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/alarmsScroll">
+        app:layout_constraintTop_toBottomOf="@+id/alarmsTitle"
+        app:layout_constraintVertical_bias="0.329">
 
         <LinearLayout
             android:id="@+id/mockAlarmsContainer"
@@ -46,6 +49,8 @@
             android:layout_weight="1"
             android:background="#00FFFFFF"
             android:backgroundTint="#00F80000"
+            android:clickable="true"
+            android:longClickable="true"
             android:shadowColor="#00FFFFFF"
             android:shadowDx="0"
             android:shadowDy="0"
@@ -76,9 +81,8 @@
         android:id="@+id/alarmsScroll"
         android:layout_width="match_parent"
         android:layout_height="250dp"
-        android:translationY="200dp"
+        android:translationY="150dp"
         android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@+id/tabsLabels"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

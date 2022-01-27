@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.ScrollView;
 
 import androidx.annotation.RequiresApi;
@@ -44,7 +45,10 @@ public class AddAlarmActivity extends AppCompatActivity {
         addAlarmFooterCreateBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                db.execSQL("INSERT INTO \"alarms\"(time, date, isEnabled) VALUES (\"" + alarmTime + "\", \"" + alarmDate + "\"," + true + ");");
+                EditText addAlarmSignalName = findViewById(R.id.addAlarmSignalName);
+                CharSequence rawSignalName = addAlarmSignalName.getText();
+                String signalName = rawSignalName.toString();
+                db.execSQL("INSERT INTO \"alarms\"(time, date, isEnabled, name) VALUES (\"" + alarmTime + "\", \"" + alarmDate + "\"," + true + "\"" + signalName + "\");");
                 Intent intent = new Intent(AddAlarmActivity.this, MainActivity.class);
                 intent.putExtra("created", true);
                 AddAlarmActivity.this.startActivity(intent);
