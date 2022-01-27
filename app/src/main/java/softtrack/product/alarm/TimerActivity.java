@@ -1,18 +1,35 @@
 package softtrack.product.alarm;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class TimerActivity  extends Fragment {
+
+    @SuppressLint("WrongConstant") public SQLiteDatabase db;
+    public ArrayList<HashMap<String, Object>> havedTimers;
+
     public TimerActivity() {
     }
 
@@ -23,9 +40,13 @@ public class TimerActivity  extends Fragment {
         return view;
     }
 
+    @SuppressLint("WrongConstant")
     @Override
     public void onStart() {
         super.onStart();
+
+        db = getActivity().openOrCreateDatabase("alarms-database.db", SQLiteDatabase.CREATE_IF_NECESSARY, null);
+
         Button timerAddBtn = getActivity().findViewById(R.id.timerAddBtn);
         timerAddBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -38,6 +59,9 @@ public class TimerActivity  extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         // TODO добавить таймер в БД
+                        db.execSQL("INSERT INTO \"timers\"(name, minutes, seconds) VALUES (\"" + "timer_name" + "\", \"" + "00" + "\", \"" + "00" + "\");");
+                        resetActiveTimer();
+                        createCustomTimer("timer_name", "00", "00", true);
                     }
                 });
                 builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
@@ -60,5 +84,80 @@ public class TimerActivity  extends Fragment {
                 mainActivity.viewPager.setCurrentItem(4);
             }
         });
+
+        Button timerContextMenuBtn = getActivity().findViewById(R.id.timerContextMenuBtn);
+        timerContextMenuBtn.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+            @Override
+            public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+                contextMenu.add(Menu.NONE, 301, Menu.NONE, "Изменить установленные таймеры");
+                contextMenu.add(Menu.NONE, 302, Menu.NONE, "Настройки");
+                contextMenu.add(Menu.NONE, 303, Menu.NONE, "Свяжитесь с нами");
+            }
+        });
+
+        havedTimers = new ArrayList<HashMap<String, Object>>();
+        Cursor timersCursor = db.rawQuery("Select * from timers", null);
+        timersCursor.moveToFirst();
+        long timersCount = DatabaseUtils.queryNumEntries(db, "timers");
+        boolean isHaveAlarms = timersCount >= 1;
+        if (isHaveAlarms) {
+            for (int timerIndex = 0; timerIndex < timersCount; timerIndex++) {
+                HashMap<String, Object> newTimer = new HashMap<String, Object>();
+                String timerName = timersCursor.getString(1);
+                newTimer.put("name", timerName);
+                String timerMinutes = timersCursor.getString(2);
+                newTimer.put("minutes", timerMinutes);
+                String timerSeconds = timersCursor.getString(3);
+                newTimer.put("seconds", timerSeconds);
+                havedTimers.add(newTimer);
+                timersCursor.moveToNext();
+            }
+            for (HashMap<String, Object> timer : havedTimers) {
+                Object rawTimerName = timer.get("name");
+                String timerName = rawTimerName.toString();
+                Object rawTimerMinutes = timer.get("minutes");
+                String timerMinutes = rawTimerMinutes.toString();
+                Object rawTimerSeconds = timer.get("seconds");
+                String timerSeconds = rawTimerSeconds.toString();
+                createCustomTimer(timerName, timerMinutes, timerSeconds, false);
+            }
+        }
+
     }
+
+    public void createCustomTimer (String timerName, String timerMinutes, String timerSeconds, boolean isActive) {
+        LinearLayout timers = getActivity().findViewById(R.id.timers);
+        Button newTimer = new Button(getActivity());
+        String timerTime = timerMinutes + ":" + timerSeconds;
+        String timerInfo = timerTime;
+        boolean isSetTimerName = timerName.length() >= 1;
+        if (isSetTimerName) {
+            timerInfo = timerName + "\n" + timerTime;
+        }
+        newTimer.setText(timerInfo);
+        newTimer.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        newTimer.setBackgroundColor(Color.parseColor("#C8C8C8"));
+        LinearLayout.LayoutParams newTimerLayoutParams = new LinearLayout.LayoutParams(500, 500);
+        newTimerLayoutParams.setMargins(25, 0, 25, 0);
+        newTimer.setLayoutParams(newTimerLayoutParams);
+        GradientDrawable shape =  new GradientDrawable();
+        if (isActive) {
+            shape.setStroke(5, Color.rgb(0, 0, 0));
+            shape.setColor(Color.rgb(255, 255, 255));
+        } else {
+            shape.setColor(Color.parseColor("#C8C8C8"));
+        }
+        shape.setCornerRadius(500);
+        newTimer.setBackground(shape);
+        timers.addView(newTimer);
+    }
+
+    public void resetActiveTimer() {
+        LinearLayout timers = getActivity().findViewById(R.id.timers);
+        int timersCount = timers.getChildCount();
+//        for(int timerIndex = 0; timerIndex < timersCount; timerIndex++) {
+//            timers.setBackground();
+//        }
+    }
+
 }

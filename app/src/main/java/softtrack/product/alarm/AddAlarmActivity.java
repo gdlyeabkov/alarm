@@ -48,7 +48,7 @@ public class AddAlarmActivity extends AppCompatActivity {
                 EditText addAlarmSignalName = findViewById(R.id.addAlarmSignalName);
                 CharSequence rawSignalName = addAlarmSignalName.getText();
                 String signalName = rawSignalName.toString();
-                db.execSQL("INSERT INTO \"alarms\"(time, date, isEnabled, name) VALUES (\"" + alarmTime + "\", \"" + alarmDate + "\"," + true + "\"" + signalName + "\");");
+                db.execSQL("INSERT INTO \"alarms\"(time, date, isEnabled, name) VALUES (\"" + alarmTime + "\", \"" + alarmDate + "\", " + true + ", \"" + signalName + "\");");
                 Intent intent = new Intent(AddAlarmActivity.this, MainActivity.class);
                 intent.putExtra("created", true);
                 AddAlarmActivity.this.startActivity(intent);

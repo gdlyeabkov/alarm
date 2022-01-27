@@ -22,7 +22,7 @@ public class StartTimerActivity extends Fragment {
     public final int countSecondsInMinute = 0;
     public final int initialSeconds = 59;
     public final String oneCharPrefix = "0";
-    public boolean isStart = false;
+    public boolean isStart = true;
     public Button startTimerTitle;
     public Button startTimerPauseBtn;
     public final String resumeLabel = "Продолжить";

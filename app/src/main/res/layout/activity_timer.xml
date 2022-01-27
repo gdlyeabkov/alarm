@@ -48,7 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@+id/timerLabel"
+        app:layout_constraintBottom_toTopOf="@+id/timerStartBtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -187,20 +187,34 @@
         </ScrollView>
     </LinearLayout>
 
-    <Button
-        android:id="@+id/timerLabel"
-        android:layout_width="150dp"
+    <ScrollView
+        android:id="@+id/timersScroll"
+        android:layout_width="match_parent"
         android:layout_height="150dp"
-        android:backgroundTint="#C8C8C8"
-        android:text="00:10:00"
-        android:textColor="#000000"
-        app:cornerRadius="100dp"
+        android:translationY="35dp"
         app:layout_constraintBottom_toTopOf="@+id/timerStartBtn"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.922" />
+        app:layout_constraintTop_toBottomOf="@+id/timerTable"
+        tools:ignore="SpeakableTextPresentCheck">
+
+        <LinearLayout
+            android:id="@+id/timers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/timerLabel"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:backgroundTint="#C8C8C8"
+                android:text="00:10:00"
+                android:textColor="#000000"
+                android:visibility="gone"
+                app:cornerRadius="100dp" />
+        </LinearLayout>
+    </ScrollView>
 
     <Button
         android:id="@+id/timerStartBtn"
