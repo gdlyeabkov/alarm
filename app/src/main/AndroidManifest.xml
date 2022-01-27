@@ -22,6 +22,10 @@
             android:name=".AddAlarmActivity"
             android:exported="true"
         />
+        <activity
+            android:name=".AddCityActivity"
+            android:exported="true"
+        />
     </application>
 
 </manifest>

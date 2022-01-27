@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
     public LinearLayout tabsLabels;
     @SuppressLint("WrongConstant") public SQLiteDatabase db;
+    public static ViewPager2 viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +47,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         TabLayout tabs = findViewById(R.id.mainTabs);
-        ViewPager2 viewPager = findViewById(R.id.currentTab);
+        viewPager = findViewById(R.id.currentTab);
+
         FragmentManager fm = getSupportFragmentManager();
         ViewStateAdapter sa = new ViewStateAdapter(fm, getLifecycle());
         viewPager.setAdapter(sa);
@@ -75,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
 
         db = openOrCreateDatabase("alarms-database.db", SQLiteDatabase.CREATE_IF_NECESSARY, null);
         db.execSQL("CREATE TABLE IF NOT EXISTS alarms (_id INTEGER PRIMARY KEY AUTOINCREMENT, time TEXT, date TEXT, isEnabled BOOLEAN);");
+        db.execSQL("CREATE TABLE IF NOT EXISTS cities (_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT);");
     }
 
     public void toggleTabHandler(View view) {
@@ -114,6 +117,8 @@ public class MainActivity extends AppCompatActivity {
                 return new StopWatchActivity();
             } else if (position == 3) {
                 return new TimerActivity();
+            } else if (position == 4) {
+                return new StartTimerActivity();
             }
             return new AlarmActivity();
         }
@@ -121,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public int getItemCount() {
             // Hardcoded, use lists
-            return 4;
+            return 5;
         }
     }
 

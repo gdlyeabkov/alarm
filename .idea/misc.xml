@@ -4,11 +4,15 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/android_projects/alarm/app/src/main/res/layout/activity_add_alarm.xml" value="0.264" />
+        <entry key="..\:/android_projects/alarm/app/src/main/res/layout/activity_add_city.xml" value="0.213768115942029" />
+        <entry key="..\:/android_projects/alarm/app/src/main/res/layout/activity_add_timer.xml" value="0.4" />
         <entry key="..\:/android_projects/alarm/app/src/main/res/layout/activity_alarm.xml" value="0.2" />
         <entry key="..\:/android_projects/alarm/app/src/main/res/layout/activity_main.xml" value="0.15555555555555556" />
+        <entry key="..\:/android_projects/alarm/app/src/main/res/layout/activity_start_timer.xml" value="0.176" />
         <entry key="..\:/android_projects/alarm/app/src/main/res/layout/activity_stopwatch.xml" value="0.264" />
-        <entry key="..\:/android_projects/alarm/app/src/main/res/layout/activity_timer.xml" value="0.2" />
+        <entry key="..\:/android_projects/alarm/app/src/main/res/layout/activity_timer.xml" value="0.4" />
         <entry key="..\:/android_projects/alarm/app/src/main/res/layout/activity_worldtime.xml" value="0.264" />
+        <entry key="..\:/android_projects/alarm/app/src/main/res/layout/city.xml" value="0.16927083333333334" />
       </map>
     </option>
   </component>
