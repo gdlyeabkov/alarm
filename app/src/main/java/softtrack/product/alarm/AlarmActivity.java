@@ -7,7 +7,10 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -54,6 +57,7 @@ public class AlarmActivity extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        getDebug();
         alarmInitialBackgroundColor = Color.rgb(255, 255, 255);
         alarmSelectedBackgroundColor = Color.rgb(185, 185, 185);
         ConstraintLayout alarmsBackground = getActivity().findViewById(R.id.alarmsBackground);
@@ -185,13 +189,23 @@ public class AlarmActivity extends Fragment {
         Bundle extras = getActivity().getIntent().getExtras();
         if(extras != null) {
             boolean isCreatedAlarm = extras.getBoolean("created");
+            boolean isRunAlarm = extras.getBoolean("runed");
             if (isCreatedAlarm) {
                 String timeForNearAlarm = "Неизвестно";
                 String toastMessage = "Будильник \n\nсработает \nчерез \n" + timeForNearAlarm;
                 Toast toast = Toast.makeText(getActivity().getApplicationContext(), toastMessage, Toast.LENGTH_SHORT);
                 toast.show();
+            } else if (isRunAlarm) {
+                MediaPlayer audio = MediaPlayer.create(getActivity().getApplicationContext(), R.raw.wake_snd);
+                audio.start();
             }
         }
+    }
+
+    public void getDebug() {
+        Uri uri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        String parsedUri = uri.getPath();
+        Log.d("debug", parsedUri);
     }
 
 }

@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -53,14 +54,25 @@ public class TimerActivity  extends Fragment {
             public void onClick(View view) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setMessage("Добавление готового таймера");
-                builder.setView(R.layout.activity_add_timer);
+                LayoutInflater inflater = getActivity().getLayoutInflater();
+                View dialogView = inflater.inflate(R.layout.activity_add_timer, null);
+                builder.setView(dialogView);
                 builder.setCancelable(false);
                 builder.setPositiveButton("Добавить", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         // TODO добавить таймер в БД
-                        db.execSQL("INSERT INTO \"timers\"(name, minutes, seconds) VALUES (\"" + "timer_name" + "\", \"" + "00" + "\", \"" + "00" + "\");");
-                        createCustomTimer("timer_name", "00", "00", true);
+                        EditText hoursLabel = (EditText) dialogView.findViewById(R.id.addTimerHours);
+                        CharSequence rawHours = hoursLabel.getText();
+                        String hours = rawHours.toString();
+                        EditText minutesLabel = (EditText) dialogView.findViewById(R.id.addTimerMinutes);
+                        CharSequence rawMinutes = minutesLabel.getText();
+                        String minutes = rawMinutes.toString();
+                        EditText secondsLabel = (EditText) dialogView.findViewById(R.id.addTimerSeconds);
+                        CharSequence rawSeconds = secondsLabel.getText();
+                        String seconds = rawSeconds.toString();
+                        db.execSQL("INSERT INTO \"timers\"(name, hours, minutes, seconds) VALUES (\"" + "timer_name" + "\", \"" + hours + "\", \"" + minutes + "\", \"" + seconds + "\");");
+                        createCustomTimer("timer_name", hours, minutes, seconds, true);
                     }
                 });
                 builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
@@ -104,9 +116,11 @@ public class TimerActivity  extends Fragment {
                 HashMap<String, Object> newTimer = new HashMap<String, Object>();
                 String timerName = timersCursor.getString(1);
                 newTimer.put("name", timerName);
-                String timerMinutes = timersCursor.getString(2);
+                String timerHours = timersCursor.getString(2);
+                newTimer.put("hours", timerHours);
+                String timerMinutes = timersCursor.getString(3);
                 newTimer.put("minutes", timerMinutes);
-                String timerSeconds = timersCursor.getString(3);
+                String timerSeconds = timersCursor.getString(4);
                 newTimer.put("seconds", timerSeconds);
                 havedTimers.add(newTimer);
                 timersCursor.moveToNext();
@@ -114,20 +128,22 @@ public class TimerActivity  extends Fragment {
             for (HashMap<String, Object> timer : havedTimers) {
                 Object rawTimerName = timer.get("name");
                 String timerName = rawTimerName.toString();
+                Object rawTimerHours = timer.get("hours");
+                String timerHours = rawTimerHours.toString();
                 Object rawTimerMinutes = timer.get("minutes");
                 String timerMinutes = rawTimerMinutes.toString();
                 Object rawTimerSeconds = timer.get("seconds");
                 String timerSeconds = rawTimerSeconds.toString();
-                createCustomTimer(timerName, timerMinutes, timerSeconds, false);
+                createCustomTimer(timerName, timerHours, timerMinutes, timerSeconds, false);
             }
         }
 
     }
 
-    public void createCustomTimer (String timerName, String timerMinutes, String timerSeconds, boolean isActive) {
+    public void createCustomTimer (String timerName, String timerHours, String timerMinutes, String timerSeconds, boolean isActive) {
         LinearLayout timers = getActivity().findViewById(R.id.timers);
         Button newTimer = new Button(getActivity());
-        String timerTime = timerMinutes + ":" + timerSeconds;
+        String timerTime = timerHours + ":" + timerMinutes + ":" + timerSeconds;
         String timerInfo = timerTime;
         boolean isSetTimerName = timerName.length() >= 1;
         if (isSetTimerName) {

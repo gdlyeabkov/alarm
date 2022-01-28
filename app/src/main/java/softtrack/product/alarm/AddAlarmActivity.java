@@ -1,20 +1,31 @@
 package softtrack.product.alarm;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.PendingIntent;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ScrollView;
+import android.widget.Switch;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,10 +35,13 @@ import java.util.Calendar;
 public class AddAlarmActivity extends AppCompatActivity {
 
     @SuppressLint("WrongConstant") public SQLiteDatabase db;
-    public String alarmDate;
-    public String alarmTime;
-    private AlarmManager alarmMgr;
-    private PendingIntent alarmIntent;
+    public String alarmDate = "28/01/2022";
+    public String alarmTime = "18:10";
+    public String oneCharPrefix = "0";
+    public Switch soundAlarmSwitch;
+    public Switch alarmPauseSwitch;
+    public Switch vibrationAlarmSwitch;
+    public String chosenRingtone = "";
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @SuppressLint("WrongConstant")
@@ -44,29 +58,33 @@ public class AddAlarmActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(AddAlarmActivity.this, MainActivity.class);
                 intent.putExtra("created", false);
+                intent.putExtra("runed", false);
+                intent.putExtra("id", 0);
                 AddAlarmActivity.this.startActivity(intent);
             }
         });
         Button addAlarmFooterCreateBtn = findViewById(R.id.addAlarmFooterCreateBtn);
         addAlarmFooterCreateBtn.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onClick(View view) {
                 EditText addAlarmSignalName = findViewById(R.id.addAlarmSignalName);
                 CharSequence rawSignalName = addAlarmSignalName.getText();
                 String signalName = rawSignalName.toString();
-                db.execSQL("INSERT INTO \"alarms\"(time, date, isEnabled, name) VALUES (\"" + alarmTime + "\", \"" + alarmDate + "\", " + true + ", \"" + signalName + "\");");
+                boolean isVibrationEnabled = vibrationAlarmSwitch.isChecked();
+                db.execSQL("INSERT INTO \"alarms\"(time, date, isEnabled, name, sound, isVibrationEnabled) VALUES (\"" + alarmTime + "\", \"" + alarmDate + "\", " + true + ", \"" + signalName + "\", \"" + chosenRingtone + "\", " + isVibrationEnabled + ");");
 
-                // пока будильних делает переход между activity
-                /*AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-                PendingIntent pi = PendingIntent.getActivity(AddAlarmActivity.this, 111, new Intent(AddAlarmActivity.this, MainActivity.class),
-                        PendingIntent.FLAG_UPDATE_CURRENT);
-                am.setInexactRepeating(AlarmManager.RTC, SystemClock.elapsedRealtime() + 5000, 10000, pi
-                );*/
-                // пока будильних делает переход между activity
-                setAlarm();
+                Cursor alarmsCursor = db.rawQuery("Select * from alarms", null);
+                alarmsCursor.moveToLast();
+                int alarmId = alarmsCursor.getInt(0);
+                setAlarm(alarmId);
+
                 Intent intent = new Intent(AddAlarmActivity.this, MainActivity.class);
                 intent.putExtra("created", true);
+                intent.putExtra("runed", false);
+                intent.putExtra("id", 0);
                 AddAlarmActivity.this.startActivity(intent);
+
             }
         });
 
@@ -103,19 +121,103 @@ public class AddAlarmActivity extends AppCompatActivity {
             }
         });
 
+        final Calendar cldr = Calendar.getInstance();
+        int day = cldr.get(Calendar.DAY_OF_MONTH);
+        String rawDay = String.valueOf(day);
+        int month = cldr.get(Calendar.MONTH);
+        String rawMonth = String.valueOf(month + 1);
+        int year = cldr.get(Calendar.YEAR);
+        if (rawDay.length() == 1) {
+            rawDay = oneCharPrefix + rawDay;
+        }
+        if (rawMonth.length() == 1) {
+            rawMonth = oneCharPrefix + rawMonth;
+        }
+        alarmDate = rawDay + "/" + rawMonth + "/" + year;
+
+        soundAlarmSwitch = findViewById(R.id.soundAlarmSwitch);
+        soundAlarmSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                boolean isSoundPermission = soundAlarmSwitch.isChecked();
+                if (isSoundPermission) {
+                    Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+                    intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION);
+                    intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select Tone");
+                    intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, (Uri) null);
+                    startActivityForResult(intent, 5);
+                }
+            }
+        });
+
+        vibrationAlarmSwitch = findViewById(R.id.vibrationAlarmSwitch);
+
     }
 
-    public void setAlarm() {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void setAlarm(int alarmId) {
         AlarmManager mAlarmManager;
         mAlarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
-        long millis = 1000l;
+        long millis = 5000l;
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0,
-                new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent alarmIntent = new Intent(getApplicationContext(), MainActivity.class);
+        alarmIntent.putExtra("created", false);
+        alarmIntent.putExtra("runed", true);
+        alarmIntent.putExtra("id", 0);
 
-        mAlarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + millis, pendingIntent);
-        mAlarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis() + millis, 20000, pendingIntent);
+        Intent broadcastContext = new Intent(getApplicationContext(), AlarmManagerBroadcastReceiver.class);
+        broadcastContext.putExtra("id", alarmId);
+        PendingIntent pi = PendingIntent.getBroadcast(getApplicationContext(),0, broadcastContext,0);
+
+        Calendar calendar = Calendar.getInstance();
+        String[] alarmDateParts = alarmDate.split("/");
+        String rawAlarmDateDay = alarmDateParts[0];
+        int alarmDateDay = Integer.valueOf(rawAlarmDateDay);
+        String rawAlarmDateMonth = alarmDateParts[1];
+        int alarmDateMonth = Integer.valueOf(rawAlarmDateMonth);
+        String rawAlarmDateYear = alarmDateParts[2];
+        int alarmDateYear = Integer.valueOf(rawAlarmDateYear);
+        String[] alarmTimeParts = alarmTime.split(":");
+        String rawHoursAlarmTime = alarmTimeParts[0];
+        int hoursAlarmTime = Integer.valueOf(rawHoursAlarmTime);
+        String rawMinutesAlarmTime = alarmTimeParts[1];
+        int minutesAlarmTime = Integer.valueOf(rawMinutesAlarmTime);
+        Log.d("debug", String.valueOf(alarmDateYear) + "/" + String.valueOf(alarmDateMonth) + "/" + String.valueOf(alarmDateDay) + " " + String.valueOf(hoursAlarmTime) + ":" + String.valueOf(minutesAlarmTime));
+        calendar.set(alarmDateYear, alarmDateMonth, alarmDateDay, hoursAlarmTime, minutesAlarmTime);
+        millis = calendar.getTimeInMillis();
+        alarmPauseSwitch = findViewById(R.id.alarmPauseSwitch);
+        boolean isNeedRepeat = alarmPauseSwitch.isChecked();
+        if (isNeedRepeat) {
+            mAlarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis() + 5000, 5000, pi);
+        } else {
+            mAlarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 5000, pi);
+        }
+        boolean isNeedVibrate = vibrationAlarmSwitch.isChecked();
+        if (isNeedVibrate) {
+            Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+            VibrationEffect vibrationEffect = VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE);
+            v.vibrate(vibrationEffect);
+        }
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("isEnabled", false);
+        db.update("alarms", contentValues, "_id = ? ", new String[] { Integer.toString(alarmId) } );
+
+    }
+
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, final Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (resultCode == Activity.RESULT_OK && requestCode == 5) {
+            Uri uri = intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+
+            if (uri != null) {
+                chosenRingtone = uri.toString();
+            } else {
+                chosenRingtone = "";
+            }
+        }
     }
 
 

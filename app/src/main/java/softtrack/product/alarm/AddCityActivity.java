@@ -32,6 +32,8 @@ public class AddCityActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(AddCityActivity.this, MainActivity.class);
                 intent.putExtra("created", false);
+                intent.putExtra("runed", false);
+                intent.putExtra("id", 0);
                 AddCityActivity.this.startActivity(intent);
             }
         });
@@ -68,6 +70,8 @@ public class AddCityActivity extends AppCompatActivity {
                     db.update("cities", contentValues, "_id = ? ", new String[] { Integer.toString(cityId) } );
                     Intent intent = new Intent(AddCityActivity.this, MainActivity.class);
                     intent.putExtra("created", false);
+                    intent.putExtra("runed", false);
+                    intent.putExtra("id", 0);
                     AddCityActivity.this.startActivity(intent);
                 }
             });
@@ -80,6 +84,8 @@ public class AddCityActivity extends AppCompatActivity {
                     db.execSQL("INSERT INTO \"cities\"(name) VALUES (\"" + cityName + "\");");
                     Intent intent = new Intent(AddCityActivity.this, MainActivity.class);
                     intent.putExtra("created", false);
+                    intent.putExtra("runed", false);
+                    intent.putExtra("id", 0);
                     AddCityActivity.this.startActivity(intent);
                 }
             });

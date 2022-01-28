@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     public LinearLayout tabsLabels;
     @SuppressLint("WrongConstant") public SQLiteDatabase db;
     public static ViewPager2 viewPager;
+    private static Context instance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,9 +77,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
         db = openOrCreateDatabase("alarms-database.db", SQLiteDatabase.CREATE_IF_NECESSARY, null);
-        db.execSQL("CREATE TABLE IF NOT EXISTS alarms (_id INTEGER PRIMARY KEY AUTOINCREMENT, time TEXT, date TEXT, isEnabled BOOLEAN, name TEXT);");
+        db.execSQL("CREATE TABLE IF NOT EXISTS alarms (_id INTEGER PRIMARY KEY AUTOINCREMENT, time TEXT, date TEXT, isEnabled BOOLEAN, name TEXT, sound TEXT, isVibrationEnabled BOOLEAN);");
         db.execSQL("CREATE TABLE IF NOT EXISTS cities (_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT);");
-        db.execSQL("CREATE TABLE IF NOT EXISTS timers (_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, minutes TEXT, seconds TEXT);");
+        db.execSQL("CREATE TABLE IF NOT EXISTS timers (_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, hours TEXT, minutes TEXT, seconds TEXT);");
+
+        instance = MainActivity.this;
+
     }
 
     public void toggleTabHandler(View view) {
@@ -129,6 +133,10 @@ public class MainActivity extends AppCompatActivity {
             // Hardcoded, use lists
             return 5;
         }
+    }
+
+    public static Context getContext() {
+        return instance.getApplicationContext();
     }
 
 }
