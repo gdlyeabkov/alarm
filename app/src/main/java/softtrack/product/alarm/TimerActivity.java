@@ -60,7 +60,6 @@ public class TimerActivity  extends Fragment {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         // TODO добавить таймер в БД
                         db.execSQL("INSERT INTO \"timers\"(name, minutes, seconds) VALUES (\"" + "timer_name" + "\", \"" + "00" + "\", \"" + "00" + "\");");
-                        resetActiveTimer();
                         createCustomTimer("timer_name", "00", "00", true);
                     }
                 });
@@ -142,6 +141,7 @@ public class TimerActivity  extends Fragment {
         newTimer.setLayoutParams(newTimerLayoutParams);
         GradientDrawable shape =  new GradientDrawable();
         if (isActive) {
+            activateTimer(newTimer);
             shape.setStroke(5, Color.rgb(0, 0, 0));
             shape.setColor(Color.rgb(255, 255, 255));
         } else {
@@ -149,15 +149,35 @@ public class TimerActivity  extends Fragment {
         }
         shape.setCornerRadius(500);
         newTimer.setBackground(shape);
+        newTimer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Button currentTimer = ((Button)(view));
+                activateTimer(currentTimer);
+            }
+        });
         timers.addView(newTimer);
     }
 
-    public void resetActiveTimer() {
+    public void deactivateTimers() {
         LinearLayout timers = getActivity().findViewById(R.id.timers);
         int timersCount = timers.getChildCount();
-//        for(int timerIndex = 0; timerIndex < timersCount; timerIndex++) {
-//            timers.setBackground();
-//        }
+        for(int timerIndex = 0; timerIndex < timersCount; timerIndex++) {
+            GradientDrawable shape =  new GradientDrawable();
+            shape.setStroke(0, Color.argb(0, 0, 0, 0));
+            shape.setColor(Color.parseColor("#C8C8C8"));
+            shape.setCornerRadius(500);
+            timers.getChildAt(timerIndex).setBackground(shape);
+        }
+    }
+
+    public void activateTimer(Button timer) {
+        deactivateTimers();
+        GradientDrawable shape =  new GradientDrawable();
+        shape.setStroke(5, Color.rgb(0, 0, 0));
+        shape.setColor(Color.rgb(255, 255, 255));
+        shape.setCornerRadius(500);
+        timer.setBackground(shape);
     }
 
 }

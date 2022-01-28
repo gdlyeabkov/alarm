@@ -1,11 +1,15 @@
 package softtrack.product.alarm;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -22,6 +26,8 @@ public class AddAlarmActivity extends AppCompatActivity {
     @SuppressLint("WrongConstant") public SQLiteDatabase db;
     public String alarmDate;
     public String alarmTime;
+    private AlarmManager alarmMgr;
+    private PendingIntent alarmIntent;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @SuppressLint("WrongConstant")
@@ -49,6 +55,15 @@ public class AddAlarmActivity extends AppCompatActivity {
                 CharSequence rawSignalName = addAlarmSignalName.getText();
                 String signalName = rawSignalName.toString();
                 db.execSQL("INSERT INTO \"alarms\"(time, date, isEnabled, name) VALUES (\"" + alarmTime + "\", \"" + alarmDate + "\", " + true + ", \"" + signalName + "\");");
+
+                // пока будильних делает переход между activity
+                /*AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+                PendingIntent pi = PendingIntent.getActivity(AddAlarmActivity.this, 111, new Intent(AddAlarmActivity.this, MainActivity.class),
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+                am.setInexactRepeating(AlarmManager.RTC, SystemClock.elapsedRealtime() + 5000, 10000, pi
+                );*/
+                // пока будильних делает переход между activity
+                setAlarm();
                 Intent intent = new Intent(AddAlarmActivity.this, MainActivity.class);
                 intent.putExtra("created", true);
                 AddAlarmActivity.this.startActivity(intent);
@@ -88,6 +103,19 @@ public class AddAlarmActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    public void setAlarm() {
+        AlarmManager mAlarmManager;
+        mAlarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+        long millis = 1000l;
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0,
+                new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+
+        mAlarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + millis, pendingIntent);
+        mAlarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis() + millis, 20000, pendingIntent);
     }
 
 
