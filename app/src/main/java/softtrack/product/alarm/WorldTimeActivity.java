@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.media.Image;
 import android.os.Bundle;
@@ -15,6 +16,8 @@ import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -31,6 +34,8 @@ public class WorldTimeActivity  extends Fragment {
     public ArrayList<HashMap<String, Object>> havedCities;
     @SuppressLint("WrongConstant") public SQLiteDatabase db;
     public int newCityBackgroundColor;
+    public int citySelectedBackgroundColor;
+    public int cityInitialBackgroundColor;
 
     public WorldTimeActivity() {
     }
@@ -47,6 +52,9 @@ public class WorldTimeActivity  extends Fragment {
     public void onStart() {
         super.onStart();
 
+        cityInitialBackgroundColor = Color.rgb(255, 255, 255);
+        citySelectedBackgroundColor = Color.rgb(185, 185, 185);
+
         db = getActivity().openOrCreateDatabase("alarms-database.db", SQLiteDatabase.CREATE_IF_NECESSARY, null);
         newCityBackgroundColor = Color.rgb(255, 255, 255);
 
@@ -54,9 +62,12 @@ public class WorldTimeActivity  extends Fragment {
         addWorldTimeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), AddCityActivity.class);
-                intent.putExtra("id", "0");
-                getActivity().startActivity(intent);
+                boolean isCanEdit = !MainActivity.isSelectionFooter;
+                if (isCanEdit) {
+                    Intent intent = new Intent(getActivity(), AddCityActivity.class);
+                    intent.putExtra("id", "0");
+                    getActivity().startActivity(intent);
+                }
             }
         });
 
@@ -73,10 +84,19 @@ public class WorldTimeActivity  extends Fragment {
 
         showCitiesWorldTime();
 
+        LinearLayout worldTimeFooterRemove = getActivity().findViewById(R.id.worldTimeFooterRemove);
+        worldTimeFooterRemove.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                removeCities();
+            }
+        });
+
     }
 
     public void showCitiesWorldTime() {
         LinearLayout cities = getActivity().findViewById(R.id.cities);
+        cities.removeAllViews();
         havedCities = new ArrayList<HashMap<String, Object>>();
         Cursor citiesCursor = db.rawQuery("Select * from cities", null);
         citiesCursor.moveToFirst();
@@ -146,12 +166,107 @@ public class WorldTimeActivity  extends Fragment {
                         getActivity().startActivity(intent);
                     }
                 });
+                newCity.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+                    @Override
+                    public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+                        boolean isTabsVisible = !MainActivity.isSelectionFooter;
+                        if (isTabsVisible) {
+                            openWorldTimeFooter();
+                        }
+                    }
+                });
             }
         } else {
             TextView notFoundCitiesLabel = new TextView(getActivity());
             notFoundCitiesLabel.setText("Нет городов");
             notFoundCitiesLabel.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             cities.addView(notFoundCitiesLabel);
+        }
+    }
+
+    public void openWorldTimeFooter() {
+
+        int isVisible = View.VISIBLE;
+        MainActivity.gateway.tabs.setVisibility(View.GONE);
+        View worldTimeFooter = getActivity().findViewById(R.id.worldTimeFooter);
+        worldTimeFooter.setVisibility(isVisible);
+        MainActivity.isSelectionFooter = true;
+
+        LinearLayout cities = getActivity().findViewById(R.id.cities);
+        int citiesCount = cities.getChildCount();
+        for (int cityIndex = 0; cityIndex < citiesCount; cityIndex++) {
+            LinearLayout city = ((LinearLayout)(cities.getChildAt(cityIndex)));
+            CheckBox citySelector = new CheckBox(getActivity());
+            GradientDrawable shape =  new GradientDrawable();
+            shape.setCornerRadius(500);
+            citySelector.setBackground(shape);
+            citySelector.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    boolean isAlarmUnselected = b;
+                    LinearLayout alarm = ((LinearLayout)(compoundButton.getParent()));
+                    if (isAlarmUnselected) {
+                        alarm.setBackgroundColor(citySelectedBackgroundColor);
+                    } else {
+                        alarm.setBackgroundColor(cityInitialBackgroundColor);
+                    }
+                }
+            });
+            LinearLayout.LayoutParams citySelectorLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            citySelector.setLayoutParams(citySelectorLayoutParams);
+            city.addView(citySelector, 0);
+        }
+    }
+
+    public void removeCities() {
+        LinearLayout cities = getActivity().findViewById(R.id.cities);
+        int citiesCount = cities.getChildCount();
+        for (int cityIndex = 0; cityIndex < citiesCount; cityIndex++) {
+            LinearLayout city = ((LinearLayout)(cities.getChildAt(cityIndex)));
+            ColorDrawable rawCityColor = ((ColorDrawable)(city.getBackground()));
+            int cityColor = rawCityColor.getColor();
+            boolean isCitySelected = cityColor == citySelectedBackgroundColor;
+            boolean isSelectionMode = MainActivity.isSelectionFooter;
+            if (isSelectionMode) {
+                CheckBox citySelector = ((CheckBox)(city.getChildAt(0)));
+                isCitySelected = citySelector.isChecked();
+                if (isCitySelected) {
+                    CharSequence rawCityData = city.getContentDescription();
+                    String cityData = rawCityData.toString();
+                    int cityId = Integer.valueOf(cityData);
+                    db.execSQL("DELETE FROM cities WHERE _id=" + cityId + ";");
+                }
+            }
+        }
+        closeWorldTimeFooter();
+        showCitiesWorldTime();
+    }
+
+    public void closeWorldTimeFooter() {
+        MainActivity.isSelectionFooter = false;
+        int isVisible = View.VISIBLE;
+        MainActivity.gateway.tabs.setVisibility(isVisible);
+        View worldTimeFooter = getActivity().findViewById(R.id.worldTimeFooter);
+        int isUnvisible = View.GONE;
+        worldTimeFooter.setVisibility(isUnvisible);
+        unselectCities();
+        TextView worldTimeTitle = getActivity().findViewById(R.id.worldTimeHeader);
+        worldTimeTitle.setText("Все будильники\nотключены");
+
+        LinearLayout cities = getActivity().findViewById(R.id.cities);
+        int citiesCount = cities.getChildCount();
+        for (int cityIndex = 0; cityIndex < citiesCount; cityIndex++) {
+            LinearLayout city = ((LinearLayout)(cities.getChildAt(cityIndex)));
+            city.removeViewAt(0);
+        }
+    }
+
+    public void unselectCities() {
+        LinearLayout cities = getActivity().findViewById(R.id.cities);
+        int citiesCount = cities.getChildCount();
+        for (int cityIndex = 0; cityIndex < citiesCount; cityIndex++) {
+            LinearLayout city = ((LinearLayout)(cities.getChildAt(cityIndex)));
+            city.setBackgroundColor(cityInitialBackgroundColor);
         }
     }
 

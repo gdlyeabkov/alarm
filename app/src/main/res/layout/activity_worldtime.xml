@@ -52,7 +52,7 @@
         android:layout_width="match_parent"
         android:layout_height="35dp"
         android:orientation="horizontal"
-        android:translationY="200dp"
+        android:translationY="150dp"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -97,6 +97,41 @@
             android:textAlignment="center"
             android:textColor="#000000"
             tools:ignore="TouchTargetSizeCheck" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/worldTimeFooter"
+        android:layout_width="match_parent"
+        android:layout_height="125dp"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:id="@+id/worldTimeFooterRemove"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/worldTimeFooterRemoveIcon"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:height="85dp"
+                android:text="🗑"
+                android:textAlignment="center"
+                android:textSize="36sp" />
+
+            <TextView
+                android:id="@+id/worldTimeFooterRemoveLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Удалить"
+                android:textAlignment="center" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

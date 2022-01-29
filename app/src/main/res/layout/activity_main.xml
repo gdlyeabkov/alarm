@@ -13,9 +13,9 @@
         android:layout_height="wrap_content"
         android:translationY="275dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:tabIndicatorColor="#000000"
+        app:tabSelectedTextColor="#000000">
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/alarmTabItem"
@@ -49,57 +49,7 @@
         android:translationY="150dp"
         app:layout_constraintBottom_toTopOf="@+id/mainTabs"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/tabsLabels"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:translationY="275dp"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/alarmTabLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:contentDescription="alarm"
-            android:outlineProvider="none"
-            android:singleLine="true"
-            android:text="Будильник"
-            android:textAlignment="center"
-            android:textStyle="normal|bold" />
-
-        <TextView
-            android:id="@+id/worldTabLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:contentDescription="world"
-            android:text="Мировое время"
-            android:textAlignment="center" />
-
-        <TextView
-            android:id="@+id/stopwatchTabLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:contentDescription="stopwatch"
-            android:text="Секундомер"
-            android:textAlignment="center" />
-
-        <TextView
-            android:id="@+id/timerTabLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:contentDescription="timer"
-            android:text="Таймер"
-            android:textAlignment="center" />
-    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -25,18 +25,17 @@ public class AlarmManagerBroadcastReceiver extends BroadcastReceiver {
         Bundle extras = intent.getExtras();
         int alarmId = extras.getInt("id");
         Cursor alarmsCursor = db.rawQuery("Select * from alarms where _id=" + Integer.toString(alarmId), null);
-        alarmsCursor.moveToFirst();
-        String soundPath = alarmsCursor.getString(5);
-        boolean isPlayNotification = soundPath.length() >= 1;
-        if (isPlayNotification) {
-            Uri parsedPath = Uri.parse(soundPath);
-            MediaPlayer alarmSoundNotification = MediaPlayer.create(MainActivity.getContext(), parsedPath);
-            alarmSoundNotification.start();
-            Log.d("debug", "путь к звуку " + soundPath);
+        boolean isAlarmExists = alarmsCursor == null;
+        if (isAlarmExists) {
+            alarmsCursor.moveToFirst();
+            String soundPath = alarmsCursor.getString(5);
+            boolean isPlayNotification = soundPath.length() >= 1;
+            if (isPlayNotification) {
+                Uri parsedPath = Uri.parse(soundPath);
+                MediaPlayer alarmSoundNotification = MediaPlayer.create(MainActivity.getContext(), parsedPath);
+                alarmSoundNotification.start();
+            }
         }
-
-//        MediaPlayer audio = MediaPlayer.create(MainActivity.getContext(), R.raw.wake_snd);
-//        audio.start();
 
     }
 }

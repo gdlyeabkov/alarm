@@ -7,6 +7,8 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,8 +19,10 @@ import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,6 +49,10 @@ public class AlarmActivity extends Fragment {
     public int alarmSelectedBackgroundColor;
     public LinearLayout alarms;
     public TextView alarmsTitle;
+    public String emptySelectedAlarmLabel = "Выберите сигналы";
+    public ArrayList<String> monthLabels;
+    public ArrayList<String> dayOfWeekLabels;
+    public CheckBox allAlarmsSelector;
 
     public AlarmActivity() {
 
@@ -64,19 +72,44 @@ public class AlarmActivity extends Fragment {
         getDebug();
         alarmInitialBackgroundColor = Color.rgb(255, 255, 255);
         alarmSelectedBackgroundColor = Color.rgb(185, 185, 185);
-        ConstraintLayout alarmsBackground = getActivity().findViewById(R.id.alarmsBackground);
         alarms = getActivity().findViewById(R.id.alarms);
-        alarmsBackground.setOnClickListener(new View.OnClickListener() {
+
+        initializeAlarmDateLabels();
+
+        showNearAlarmInfo();
+
+        LinearLayout alarmFooterToggleIsEnabled = getActivity().findViewById(R.id.alarmFooterToggleIsEnabled);
+        alarmFooterToggleIsEnabled.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int alarmsCount = alarms.getChildCount();
-                for (int alarmIndex = 0; alarmIndex < alarmsCount; alarmIndex++) {
-                    LinearLayout alarm = ((LinearLayout)(alarms.getChildAt(alarmIndex)));
-                    alarm.setBackgroundColor(alarmInitialBackgroundColor);
+                toggleAlarm();
+            }
+        });
+
+        LinearLayout alarmFooterRemove = getActivity().findViewById(R.id.alarmFooterRemove);
+        alarmFooterRemove.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                removeAlarms();
+            }
+        });
+
+        allAlarmsSelector = getActivity().findViewById(R.id.allAlarmsSelector);
+        allAlarmsSelector.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                boolean isSelectAllAlarms = b;
+                if (isSelectAllAlarms) {
+                    int alarmsCount = alarms.getChildCount();
+                    for (int alarmIndex = 0; alarmIndex < alarmsCount; alarmIndex++) {
+                        LinearLayout alarm = ((LinearLayout) (alarms.getChildAt(alarmIndex)));
+                        CheckBox alarmSelector = ((CheckBox)(alarm.getChildAt(0)));
+                        alarmSelector.setChecked(true);
+                    }
                 }
             }
         });
-        showNearAlarmInfo();
+
     }
 
     @SuppressLint("WrongConstant")
@@ -111,7 +144,40 @@ public class AlarmActivity extends Fragment {
                 newAlarm.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
                     @Override
                     public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
-                        newAlarm.setBackgroundColor(alarmSelectedBackgroundColor);
+                        ColorDrawable rawAlarmColor = ((ColorDrawable)(newAlarm.getBackground()));
+                        int alarmColor = rawAlarmColor.getColor();
+                        boolean isAlarmUnselected = alarmColor == alarmInitialBackgroundColor;
+                        /*if (isAlarmUnselected) {
+                            newAlarm.setBackgroundColor(alarmSelectedBackgroundColor);
+                        } else {
+                            newAlarm.setBackgroundColor(alarmInitialBackgroundColor);
+                        }*/
+                        boolean isTabsVisible = !MainActivity.isSelectionFooter;
+                        if (isTabsVisible) {
+                            openAlarmFooter();
+                        }
+                        int countSelectedAlarms = 0;
+                        for (int alarmIndex = 0; alarmIndex < alarmsCount; alarmIndex++) {
+                            LinearLayout alarm = ((LinearLayout) (alarms.getChildAt(alarmIndex)));
+                            ColorDrawable rawCurrentAlarmColor = ((ColorDrawable) (alarm.getBackground()));
+                            int currentAlarmColor = rawCurrentAlarmColor.getColor();
+                            boolean isAlarmSelected = currentAlarmColor == alarmSelectedBackgroundColor;
+                            boolean isSelectionMode = MainActivity.isSelectionFooter;
+                            if (isSelectionMode) {
+                                CheckBox alarmSelector = ((CheckBox) (alarm.getChildAt(0)));
+                                isAlarmSelected = isAlarmSelected = alarmSelector.isChecked();
+                                if (isAlarmSelected) {
+                                    countSelectedAlarms++;
+                                }
+                            }
+                        }
+                        String rawCountSelectedAlarms = String.valueOf(countSelectedAlarms);
+                        String countSelectedAlarmsLabel = "Выбрано: " + rawCountSelectedAlarms;
+                        boolean isCountSelectedAlarmsEmpty = countSelectedAlarms == 0;
+                        if (isCountSelectedAlarmsEmpty) {
+                            countSelectedAlarmsLabel = emptySelectedAlarmLabel;
+                        }
+                        alarmsTitle.setText(countSelectedAlarmsLabel);
                     }
                 });
                 newAlarm.setBackgroundColor(alarmInitialBackgroundColor);
@@ -124,13 +190,30 @@ public class AlarmActivity extends Fragment {
                 String alarmTime = rawAlarmTime.toString();
                 newAlarmTime.setText(alarmTime);
                 LinearLayout.LayoutParams newAlarmTimeLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
-                newAlarmTimeLayoutParams.setMargins(50, 0, 0, 0);
+                newAlarmTimeLayoutParams.setMargins(50, 65, 0, 0);
                 newAlarmTime.setLayoutParams(newAlarmTimeLayoutParams);
+                newAlarmTime.setTextSize(24);
                 newAlarm.addView(newAlarmTime);
                 Switch newAlarmDateAndIsEnabled = new Switch(getActivity().getApplicationContext());
                 Object rawAlarmDate = alarm.get("date");
                 String alarmDate = rawAlarmDate.toString();
-                newAlarmDateAndIsEnabled.setText(alarmDate);
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                String alarmDateContent = alarmDate;
+                try {
+                    Date d1 = sdf.parse(alarmDate);
+                    Calendar parsedAlarmDate = Calendar.getInstance();
+                    parsedAlarmDate.setTime(d1);
+                    int dayOfWeekIndex = parsedAlarmDate.get(Calendar.DAY_OF_WEEK) - 1;
+                    String dayOfWeekLabel = dayOfWeekLabels.get(dayOfWeekIndex);
+                    int rawDayLabel = parsedAlarmDate.get(Calendar.DATE);
+                    String dayLabel = String.valueOf(rawDayLabel);
+                    int monthIndex = parsedAlarmDate.get(Calendar.MONTH);
+                    String monthLabel = monthLabels.get(monthIndex);
+                    alarmDateContent = dayOfWeekLabel + ", " + dayLabel + " " + monthLabel;
+                } catch (ParseException e) {
+                    Log.d("debug", "ошибка парсинга даты будильника");
+                }
+                newAlarmDateAndIsEnabled.setText(alarmDateContent);
                 Object rawAlarmId = alarm.get("id");
                 String parsedRawAlarmId = String.valueOf(rawAlarmId);
                 newAlarmDateAndIsEnabled.setContentDescription(parsedRawAlarmId);
@@ -213,6 +296,16 @@ public class AlarmActivity extends Fragment {
                 newAlarmDateAndIsEnabledLayoutParams.setMargins(800, 0, 0, 0);
                 newAlarmDateAndIsEnabled.setLayoutParams(newAlarmDateAndIsEnabledLayoutParams);
                 newAlarm.addView(newAlarmDateAndIsEnabled);
+                newAlarm.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        boolean isCanEdit = !MainActivity.isSelectionFooter;
+                        if (isCanEdit) {
+                            Intent intent = new Intent(getActivity(), AddAlarmActivity.class);
+                            getActivity().startActivity(intent);
+                        }
+                    }
+                });
                 alarms.addView(newAlarm);
             }
         } else {
@@ -271,6 +364,150 @@ public class AlarmActivity extends Fragment {
         Uri uri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         String parsedUri = uri.getPath();
         Log.d("debug", parsedUri);
+    }
+
+    public void removeAlarms() {
+        int alarmsCount = alarms.getChildCount();
+        for (int alarmIndex = 0; alarmIndex < alarmsCount; alarmIndex++) {
+            LinearLayout alarm = ((LinearLayout)(alarms.getChildAt(alarmIndex)));
+            ColorDrawable rawAlarmColor = ((ColorDrawable)(alarm.getBackground()));
+            int alarmColor = rawAlarmColor.getColor();
+            boolean isAlarmSelected = alarmColor == alarmSelectedBackgroundColor;
+            boolean isSelectionMode = MainActivity.isSelectionFooter;
+            if (isSelectionMode) {
+                CheckBox alarmSelector = ((CheckBox)(alarm.getChildAt(0)));
+                isAlarmSelected = isAlarmSelected = alarmSelector.isChecked();
+                if (isAlarmSelected) {
+                    View alarmAside = alarm.getChildAt(2);
+                    CharSequence rawAlarmAsideData = alarmAside.getContentDescription();
+                    String alarmAsideData = rawAlarmAsideData.toString();
+                    int alarmId = Integer.valueOf(alarmAsideData);
+                    db.execSQL("DELETE FROM alarms WHERE _id=" + alarmId + ";");
+                }
+            }
+        }
+        closeAlarmFooter();
+        redrawAlarms();
+    }
+
+    public void unselectAlarms() {
+        int alarmsCount = alarms.getChildCount();
+        for (int alarmIndex = 0; alarmIndex < alarmsCount; alarmIndex++) {
+            LinearLayout alarm = ((LinearLayout)(alarms.getChildAt(alarmIndex)));
+            alarm.setBackgroundColor(alarmInitialBackgroundColor);
+        }
+    }
+
+    public void openAlarmFooter() {
+        int isVisible = View.VISIBLE;
+        CheckBox allAlarmsSelector = getActivity().findViewById(R.id.allAlarmsSelector);
+        allAlarmsSelector.setVisibility(isVisible);
+        MainActivity.gateway.tabs.setVisibility(View.GONE);
+        View alarmFooter = getActivity().findViewById(R.id.alarmFooter);
+        alarmFooter.setVisibility(isVisible);
+        MainActivity.isSelectionFooter = true;
+
+        int alarmsCount = alarms.getChildCount();
+        for (int alarmIndex = 0; alarmIndex < alarmsCount; alarmIndex++) {
+            LinearLayout alarm = ((LinearLayout)(alarms.getChildAt(alarmIndex)));
+            CheckBox alarmSelector = new CheckBox(getActivity());
+            GradientDrawable shape =  new GradientDrawable();
+            shape.setCornerRadius(500);
+            alarmSelector.setBackground(shape);
+            alarmSelector.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    boolean isAlarmUnselected = b;
+                    LinearLayout alarm = ((LinearLayout)(compoundButton.getParent()));
+                    if (isAlarmUnselected) {
+                        alarm.setBackgroundColor(alarmSelectedBackgroundColor);
+                    } else {
+                        alarm.setBackgroundColor(alarmInitialBackgroundColor);
+                    }
+                }
+            });
+            LinearLayout.LayoutParams alarmSelectorLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            alarmSelector.setLayoutParams(alarmSelectorLayoutParams);
+            alarm.addView(alarmSelector, 0);
+        }
+
+    }
+
+    public void closeAlarmFooter() {
+        MainActivity.isSelectionFooter = false;
+        int isVisible = View.VISIBLE;
+        MainActivity.gateway.tabs.setVisibility(isVisible);
+        View alarmFooter = getActivity().findViewById(R.id.alarmFooter);
+        int isUnvisible = View.GONE;
+        alarmFooter.setVisibility(isUnvisible);
+        unselectAlarms();
+        alarmsTitle.setText("Все будильники\nотключены");
+
+        int alarmsCount = alarms.getChildCount();
+        for (int alarmIndex = 0; alarmIndex < alarmsCount; alarmIndex++) {
+            LinearLayout alarm = ((LinearLayout)(alarms.getChildAt(alarmIndex)));
+            alarm.removeViewAt(0);
+        }
+
+        CheckBox allAlarmsSelector = getActivity().findViewById(R.id.allAlarmsSelector);
+        allAlarmsSelector.setVisibility(isUnvisible);
+
+    }
+
+    public void toggleAlarm() {
+        int alarmsCount = alarms.getChildCount();
+        for (int alarmIndex = 0; alarmIndex < alarmsCount; alarmIndex++) {
+            LinearLayout alarm = ((LinearLayout)(alarms.getChildAt(alarmIndex)));
+            ColorDrawable rawAlarmColor = ((ColorDrawable)(alarm.getBackground()));
+            int alarmColor = rawAlarmColor.getColor();
+            boolean isAlarmSelected = alarmColor == alarmSelectedBackgroundColor;
+            boolean isSelectionMode = MainActivity.isSelectionFooter;
+            if (isSelectionMode) {
+                CheckBox alarmSelector = ((CheckBox) (alarm.getChildAt(0)));
+                isAlarmSelected = isAlarmSelected = alarmSelector.isChecked();
+                if (isAlarmSelected) {
+                    Switch alarmAside = ((Switch) (alarm.getChildAt(2)));
+                    CharSequence rawAlarmAsideData = alarmAside.getContentDescription();
+                    String alarmAsideData = rawAlarmAsideData.toString();
+                    int alarmId = Integer.valueOf(alarmAsideData);
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put("isEnabled", !alarmAside.isChecked());
+                    db.update("alarms", contentValues, "_id = ? ", new String[]{Integer.toString(alarmId)});
+                }
+            }
+        }
+        closeAlarmFooter();
+        redrawAlarms();
+    }
+
+    public int getDayNumberOld(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        return cal.get(Calendar.DAY_OF_WEEK);
+    }
+
+    public void initializeAlarmDateLabels() {
+        dayOfWeekLabels = new ArrayList<String>();
+        dayOfWeekLabels.add("воскр.");
+        dayOfWeekLabels.add("пон.");
+        dayOfWeekLabels.add("втор.");
+        dayOfWeekLabels.add("сред.");
+        dayOfWeekLabels.add("четв.");
+        dayOfWeekLabels.add("пятн.");
+        dayOfWeekLabels.add("суб.");
+        monthLabels = new ArrayList<String>();
+        monthLabels.add("янв.");
+        monthLabels.add("фев.");
+        monthLabels.add("мар.");
+        monthLabels.add("апр.");
+        monthLabels.add("мая");
+        monthLabels.add("июн.");
+        monthLabels.add("июл.");
+        monthLabels.add("авг.");
+        monthLabels.add("сен.");
+        monthLabels.add("окт.");
+        monthLabels.add("ноя.");
+        monthLabels.add("дек.");
     }
 
 }

@@ -18,10 +18,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Switch;
@@ -43,6 +45,12 @@ public class MainActivity extends AppCompatActivity {
     public static String timerHours = "00";
     public static String timerMinutes = "00";
     public static String timerSeconds = "00";
+    public static MainActivity gateway;
+    public TabLayout tabs;
+    public static boolean isSelectionFooter = false;
+    public LinearLayout alarms;
+    public int alarmInitialBackgroundColor;
+    public LinearLayout cities;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        TabLayout tabs = findViewById(R.id.mainTabs);
+        tabs = findViewById(R.id.mainTabs);
         viewPager = findViewById(R.id.currentTab);
 
         FragmentManager fm = getSupportFragmentManager();
@@ -99,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
         db.execSQL("CREATE TABLE IF NOT EXISTS timers (_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, hours TEXT, minutes TEXT, seconds TEXT);");
 
         instance = MainActivity.this;
+        gateway = MainActivity.this;
 
     }
 
@@ -179,6 +188,78 @@ public class MainActivity extends AppCompatActivity {
         String parsedRawTimerSeconds = rawTimerSeconds.toString();
 //        timerSeconds = Integer.valueOf(parsedRawTimerSeconds);
         timerSeconds = parsedRawTimerSeconds;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!isSelectionFooter) {
+            super.onBackPressed();
+        } else {
+            boolean isAlarmActivity = viewPager.getCurrentItem() == 0;
+            boolean isWorldTimeActivity = viewPager.getCurrentItem() == 1;
+            if (isAlarmActivity) {
+                closeAlarmFooter();
+            } else if (isWorldTimeActivity) {
+                closeWorldTimeFooter();
+            }
+        }
+
+    }
+
+    public void unselectAlarms() {
+        alarmInitialBackgroundColor = Color.rgb(255, 255, 255);
+        alarms = findViewById(R.id.alarms);
+        int alarmsCount = alarms.getChildCount();
+        for (int alarmIndex = 0; alarmIndex < alarmsCount; alarmIndex++) {
+            LinearLayout alarm = ((LinearLayout)(alarms.getChildAt(alarmIndex)));
+            alarm.setBackgroundColor(alarmInitialBackgroundColor);
+        }
+    }
+
+    public void closeAlarmFooter() {
+        isSelectionFooter = false;
+        int isVisible = View.VISIBLE;
+        MainActivity.gateway.tabs.setVisibility(isVisible);
+        View alarmFooter = findViewById(R.id.alarmFooter);
+        int isUnvisible = View.GONE;
+        alarmFooter.setVisibility(isUnvisible);
+        unselectAlarms();
+        TextView alarmsTitle = findViewById(R.id.alarmsTitle);
+        alarmsTitle.setText("Все будильники отключены");
+
+        int alarmsCount = alarms.getChildCount();
+        for (int alarmIndex = 0; alarmIndex < alarmsCount; alarmIndex++) {
+            LinearLayout alarm = ((LinearLayout)(alarms.getChildAt(alarmIndex)));
+            alarm.removeViewAt(0);
+        }
+
+        CheckBox allAlarmsSelector = findViewById(R.id.allAlarmsSelector);
+        allAlarmsSelector.setVisibility(isUnvisible);
+
+    }
+
+    public void closeWorldTimeFooter() {
+        isSelectionFooter = false;
+        int isVisible = View.VISIBLE;
+        MainActivity.gateway.tabs.setVisibility(isVisible);
+
+        View worldTimeFooter = findViewById(R.id.worldTimeFooter);
+        int isUnvisible = View.GONE;
+        worldTimeFooter.setVisibility(isUnvisible);
+        unselectCities();
+        TextView worldTimeTitle = findViewById(R.id.worldTimeHeader);
+        worldTimeTitle.setText("Все будильники\nотключены");
+
+        int citiesCount = cities.getChildCount();
+        for (int cityIndex = 0; cityIndex < citiesCount; cityIndex++) {
+            LinearLayout city = ((LinearLayout)(cities.getChildAt(cityIndex)));
+            city.removeViewAt(0);
+        }
+
+    }
+
+    public void unselectCities() {
+        cities = findViewById(R.id.cities);
     }
 
 }

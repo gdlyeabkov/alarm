@@ -32,17 +32,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/alarmsTitle">
 
-        <LinearLayout
-            android:id="@+id/mockAlarmsContainer"
-            android:layout_width="250dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="horizontal"></LinearLayout>
+        <CheckBox
+            android:id="@+id/allAlarmsSelector"
+            android:layout_width="65dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="25dp"
+            android:text="Все"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/addAlarmBtn"
             android:layout_width="25sp"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="200dp"
             android:layout_weight="1"
             android:background="#00FFFFFF"
             android:backgroundTint="#00F80000"
@@ -96,5 +98,64 @@
 
         </LinearLayout>
     </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/alarmFooter"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/alarmsScroll">
+
+        <LinearLayout
+            android:id="@+id/alarmFooterToggleIsEnabled"
+            android:layout_width="85dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="65dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/alarmFooterToggleIsEnabledIcon"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:text="⏰"
+                android:textAlignment="center"
+                android:textSize="32sp" />
+
+            <TextView
+                android:id="@+id/alarmFooterToggleIsEnabledLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Выключить"
+                android:textAlignment="center" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/alarmFooterRemove"
+            android:layout_width="85dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="100dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/alarmFooterRemoveIcon"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:text="🗑"
+                android:textAlignment="center"
+                android:textSize="32sp" />
+
+            <TextView
+                android:id="@+id/alarmFooterRemoveLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Удалить"
+                android:textAlignment="center" />
+        </LinearLayout>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
