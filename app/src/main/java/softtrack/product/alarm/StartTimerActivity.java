@@ -19,7 +19,7 @@ public class StartTimerActivity extends Fragment {
     public Timer timer;
     public String timePartsSeparator = ":";
     public final int millisecondsInSecond = 1000;
-    public final int countSecondsInMinute = 0;
+    public final int countSecondsInMinute = -1;
     public final int initialSeconds = 59;
     public final String oneCharPrefix = "0";
     public boolean isStart = true;
@@ -29,6 +29,10 @@ public class StartTimerActivity extends Fragment {
     public int resumeColor;
     public int pauseColor;
     public String pauseLabel;
+    public static StartTimerActivity activityContext;
+    public int initialMinutes = 59;
+    public int countMinutesInHour = -1;
+    public int delayForDisplayInitialSeconds = 1000;
 
     @Nullable
     @Override
@@ -60,7 +64,7 @@ public class StartTimerActivity extends Fragment {
             @Override
             public void onClick(View view) {
                 boolean isNotStart = !isStart;
-                if (isStart) {
+                if (isNotStart) {
                     startTimer();
                 } else {
                     stopTimer();
@@ -69,10 +73,10 @@ public class StartTimerActivity extends Fragment {
             }
         });
 
-        startTimer();
-
         pauseColor = Color.rgb(255, 0, 0);
         resumeColor = Color.rgb(0, 0, 255);
+
+        activityContext = StartTimerActivity.this;
 
     }
 
@@ -86,8 +90,10 @@ public class StartTimerActivity extends Fragment {
             CharSequence rawTitleText = startTimerTitle.getText();
             String titleText = rawTitleText.toString();
             String[] timeParts = titleText.split(timePartsSeparator);
-            String rawMinutes = timeParts[0];
-            String rawSeconds = timeParts[1];
+            String rawHours = timeParts[0];
+            String rawMinutes = timeParts[1];
+            String rawSeconds = timeParts[2];
+            int hours = Integer.valueOf(rawHours);
             int minutes = Integer.valueOf(rawMinutes);
             int seconds = Integer.valueOf(rawSeconds);
             seconds--;
@@ -95,6 +101,17 @@ public class StartTimerActivity extends Fragment {
             if (isToggleSecond) {
                 seconds = initialSeconds;
                 minutes--;
+                boolean isToggleMinute = minutes == countMinutesInHour;
+                if (isToggleMinute) {
+                    minutes = initialMinutes;
+                    hours--;
+                }
+            }
+            String updatedHoursText = String.valueOf(hours);
+            int countHoursChars = updatedHoursText.length();
+            boolean isAddHoursPrefix = countHoursChars == 1;
+            if (isAddHoursPrefix) {
+                updatedHoursText = oneCharPrefix + updatedHoursText;
             }
             String updatedMinutesText = String.valueOf(minutes);
             int countMinutesChars = updatedMinutesText.length();
@@ -108,17 +125,29 @@ public class StartTimerActivity extends Fragment {
             if (isAddSecondsPrefix) {
                 updatedSecondsText = oneCharPrefix + updatedSecondsText;
             }
-            String currentTime = updatedMinutesText + ":" + updatedSecondsText;
+            String currentTime = updatedHoursText + ":" + updatedMinutesText + ":" + updatedSecondsText;
             startTimerTitle.setText(currentTime);
+            boolean isTimerEnd = hours < 0 || minutes < 0 || seconds < 0;
+            if (isTimerEnd) {
+                /*
+                 *  Пытался остановить таймер когда время таймера истекло но возникает ошибка
+                 */
+                // stopTimer();
+                MainActivity.viewPager.setCurrentItem(3);
+            }
         };
-    }, 0, millisecondsInSecond);
+    }, delayForDisplayInitialSeconds, millisecondsInSecond);
     }
 
     public void stopTimer() {
-        startTimerPauseBtn.setText(resumeLabel);
-        startTimerPauseBtn.setBackgroundColor(resumeColor);
-        timer.cancel();
-        timer.purge();
+        boolean isTimerExists = timer != null;
+        if (isTimerExists) {
+            startTimerPauseBtn.setText(resumeLabel);
+            startTimerPauseBtn.setBackgroundColor(resumeColor);
+            timer.cancel();
+            timer.purge();
+        }
     }
+
 
 }

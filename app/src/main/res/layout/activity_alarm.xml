@@ -13,9 +13,8 @@
         android:text="Все будильники\nотключены"
         android:textAlignment="center"
         android:textSize="30sp"
-        android:translationY="50dp"
+        android:translationY="0dp"
         android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@+id/alarmsScroll"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -26,7 +25,7 @@
         android:layout_height="50dp"
         android:clickable="false"
         android:orientation="horizontal"
-        android:translationY="425dp"
+        android:translationY="50dp"
         android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -56,6 +55,7 @@
             android:text="+"
             android:textAlignment="center"
             android:textColor="#000000"
+            android:textSize="24sp"
             tools:ignore="TouchTargetSizeCheck" />
 
         <Button
@@ -72,6 +72,7 @@
             android:text="⫶"
             android:textAlignment="center"
             android:textColor="#000000"
+            android:textSize="24sp"
             tools:ignore="TouchTargetSizeCheck" />
     </LinearLayout>
 
@@ -79,11 +80,12 @@
         android:id="@+id/alarmsScroll"
         android:layout_width="match_parent"
         android:layout_height="250dp"
-        android:translationY="150dp"
+        android:translationY="0dp"
         android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/alarmsBtns"
         tools:ignore="SpeakableTextPresentCheck">
 
         <LinearLayout

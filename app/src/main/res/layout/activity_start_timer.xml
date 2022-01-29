@@ -13,7 +13,7 @@
         android:layout_marginTop="150dp"
         android:backgroundTint="#DCDCDC"
         android:shadowColor="#000000"
-        android:text="10:00"
+        android:text="00:10:00"
         android:textColor="#000000"
         android:textSize="24sp"
         app:cornerRadius="500dp"

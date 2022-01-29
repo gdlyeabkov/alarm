@@ -28,7 +28,11 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
 public class AlarmActivity extends Fragment {
@@ -145,6 +149,64 @@ public class AlarmActivity extends Fragment {
                         ContentValues contentValues = new ContentValues();
                         contentValues.put("isEnabled", compoundButton.isChecked());
                         db.update("alarms", contentValues, "_id = ? ", new String[] { Integer.toString(alarmId) } );
+                        boolean isAlarmEnabled = b;
+                        if (isAlarmEnabled) {
+                            Cursor alarmsCursor = db.rawQuery("Select * from alarms where _id=" + Integer.toString(alarmId), null);
+                            alarmsCursor.moveToFirst();
+                            String alarmTime = alarmsCursor.getString(1);
+                            String alarmDate = alarmsCursor.getString(2);
+                            String timeForNearAlarm = alarmTime + " " + alarmDate;
+                            try {
+                                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                                String start_date = alarmDate + " " + alarmTime;
+                                Date d1 = sdf.parse(start_date);
+                                Date d2 = new Date();
+                                d2.setTime(Calendar.getInstance().getTimeInMillis());
+                                long endDateMillis = d2.getTime();
+                                endDateMillis = System.currentTimeMillis();
+                                long difference_In_Time = endDateMillis - d1.getTime();
+                                long difference_In_Minutes = (difference_In_Time / (1000 * 60)) % 60;
+                                String minutesPostfix = " минут";
+                                String rawMinutes = String.valueOf(difference_In_Minutes);
+                                boolean isOneMinutePostfix = rawMinutes.endsWith("1");
+                                boolean isManyMinutesPostfix = rawMinutes.endsWith("2") || rawMinutes.endsWith("3") || rawMinutes.endsWith("4");
+                                if (isOneMinutePostfix) {
+                                    minutesPostfix += "у";
+                                } else if (isManyMinutesPostfix) {
+                                    minutesPostfix += "ы";
+                                }
+                                long difference_In_Hours = (difference_In_Time / (1000 * 60 * 60)) % 24;
+                                String hoursPostfix = " час";
+                                String rawHours = String.valueOf(difference_In_Hours);
+                                boolean isMultipleHoursPostfix = rawHours.endsWith("2") || rawHours.endsWith("3") || rawHours.endsWith("4");
+                                boolean isManyHoursPostfix = difference_In_Hours >= 5 || difference_In_Hours == 0;
+                                if (isMultipleHoursPostfix) {
+                                    hoursPostfix += "а";
+                                } else if (isManyHoursPostfix) {
+                                    hoursPostfix += "ов";
+                                }
+                                long difference_In_Days = (difference_In_Time / (1000 * 60 * 60 * 24)) % 365;
+                                String daysPostfix = " д";
+                                String rawDays = String.valueOf(difference_In_Days);
+                                boolean isOneDayPostfix = rawDays.endsWith("1");
+                                boolean isMultipleDaysPostfix = rawDays.endsWith("2") || rawDays.endsWith("3") || rawDays.endsWith("4");
+                                boolean isManyDaysPostfix = difference_In_Days >= 5 || difference_In_Days == 0;
+                                if (isOneDayPostfix) {
+                                    daysPostfix += "ень";
+                                } else if (isMultipleDaysPostfix) {
+                                    daysPostfix += "ня";
+                                } else if (isManyDaysPostfix) {
+                                    daysPostfix += "ней";
+                                }
+                                long difference_In_Years = (difference_In_Time / (1000l * 60 * 60 * 24 * 365));
+                                timeForNearAlarm = difference_In_Days  + daysPostfix + " " + difference_In_Hours  + hoursPostfix + " " + difference_In_Minutes + minutesPostfix;
+                            } catch (ParseException e) {
+                                Log.d("debug", "Не могу пропарсить дату " + e.getMessage());
+                            }
+                            String toastMessage = "Будильник \n\nсработает \nчерез \n" + timeForNearAlarm;
+                            Toast toast = Toast.makeText(getActivity().getApplicationContext(), toastMessage, Toast.LENGTH_SHORT);
+                            toast.show();
+                        }
                     }
                 });
                 LinearLayout.LayoutParams newAlarmDateAndIsEnabledLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
@@ -153,34 +215,37 @@ public class AlarmActivity extends Fragment {
                 newAlarm.addView(newAlarmDateAndIsEnabled);
                 alarms.addView(newAlarm);
             }
-            Button addAlarmBtn = getActivity().findViewById(R.id.addAlarmBtn);
-            addAlarmBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(getActivity(), AddAlarmActivity.class);
-                    getActivity().startActivity(intent);
-                }
-            });
-            Button alarmsContextMenuBtn = getActivity().findViewById(R.id.alarmsContextMenuBtn);
-            alarmsContextMenuBtn.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
-                @Override
-                public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
-                    contextMenu.add(Menu.NONE, 101, Menu.NONE, "Установить время отхода ко сну и пробуждения");
-                    contextMenu.add(Menu.NONE, 102, Menu.NONE, "Изменить");
-                    contextMenu.add(Menu.NONE, 103, Menu.NONE, "Настройки");
-                    contextMenu.add(Menu.NONE, 104, Menu.NONE, "Свяжитесь с нами");
-                }
-            });
         } else {
             alarmsTitle.setText("Будильник");
             TextView notFoundAlarms = new TextView(getActivity());
             notFoundAlarms.setText(notFoundAlarmsLabel);
             notFoundAlarms.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             notFoundAlarms.setTextSize(notFoundAlarmsLabelSize);
-            LinearLayout.LayoutParams notFoundAlarmsLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 100);
+            LinearLayout.LayoutParams notFoundAlarmsLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 250);
             notFoundAlarms.setLayoutParams(notFoundAlarmsLayoutParams);
             alarms.addView(notFoundAlarms);
         }
+
+        Button addAlarmBtn = getActivity().findViewById(R.id.addAlarmBtn);
+        addAlarmBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), AddAlarmActivity.class);
+                getActivity().startActivity(intent);
+            }
+        });
+
+        Button alarmsContextMenuBtn = getActivity().findViewById(R.id.alarmsContextMenuBtn);
+        alarmsContextMenuBtn.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+            @Override
+            public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+                contextMenu.add(Menu.NONE, 101, Menu.NONE, "Установить время отхода ко сну и пробуждения");
+                contextMenu.add(Menu.NONE, 102, Menu.NONE, "Изменить");
+                contextMenu.add(Menu.NONE, 103, Menu.NONE, "Настройки");
+                contextMenu.add(Menu.NONE, 104, Menu.NONE, "Свяжитесь с нами");
+            }
+        });
+
     }
 
     public void showNearAlarmInfo() {

@@ -40,6 +40,9 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("WrongConstant") public SQLiteDatabase db;
     public static ViewPager2 viewPager;
     private static Context instance;
+    public static String timerHours = "00";
+    public static String timerMinutes = "00";
+    public static String timerSeconds = "00";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +75,21 @@ public class MainActivity extends AppCompatActivity {
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
-                tabs.selectTab(tabs.getTabAt(position));
+                boolean isStartTimerActivity = position == 4;
+                if (isStartTimerActivity) {
+                    tabs.selectTab(tabs.getTabAt(position));
+                    StartTimerActivity.activityContext.startTimerTitle.setText(MainActivity.timerHours + ":" + MainActivity.timerMinutes + ":" + MainActivity.timerSeconds);
+                    StartTimerActivity.activityContext.startTimer();
+                }
+                else {
+                    boolean isStartTimerActivityExists = StartTimerActivity.activityContext != null;
+                    if (isStartTimerActivityExists) {
+                        /*
+                         *  Пытался остановить таймер при каждом переходе на любую вкладку кроме StartTimer но возникает ошибка
+                         */
+                        // StartTimerActivity.activityContext.stopTimer();
+                    }
+                }
             }
         });
 
@@ -123,7 +140,8 @@ public class MainActivity extends AppCompatActivity {
             } else if (position == 3) {
                 return new TimerActivity();
             } else if (position == 4) {
-                return new StartTimerActivity();
+                StartTimerActivity startTimerActivity = new StartTimerActivity();
+                return startTimerActivity;
             }
             return new AlarmActivity();
         }
@@ -137,6 +155,30 @@ public class MainActivity extends AppCompatActivity {
 
     public static Context getContext() {
         return instance.getApplicationContext();
+    }
+
+    public void setTimerHours(View hoursLabel) {
+        TextView timeLabel = ((TextView)(hoursLabel));
+        CharSequence rawTimerHours = timeLabel.getText();
+        String parsedRawTimerHours = rawTimerHours.toString();
+        // timerHours = Integer.valueOf(parsedRawTimerHours);
+        timerHours = parsedRawTimerHours;
+    }
+
+    public void setTimerMinutes(View minutesLabel) {
+        TextView timeLabel = ((TextView)(minutesLabel));
+        CharSequence rawTimerMinutes = timeLabel.getText();
+        String parsedRawTimerMinutes = rawTimerMinutes.toString();
+//        timerMinutes = Integer.valueOf(parsedRawTimerMinutes);
+        timerMinutes = parsedRawTimerMinutes;
+    }
+
+    public void setTimerSeconds(View secondsLabel) {
+        TextView timeLabel = ((TextView)(secondsLabel));
+        CharSequence rawTimerSeconds = timeLabel.getText();
+        String parsedRawTimerSeconds = rawTimerSeconds.toString();
+//        timerSeconds = Integer.valueOf(parsedRawTimerSeconds);
+        timerSeconds = parsedRawTimerSeconds;
     }
 
 }

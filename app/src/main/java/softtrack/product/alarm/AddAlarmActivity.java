@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -24,8 +25,10 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -42,6 +45,8 @@ public class AddAlarmActivity extends AppCompatActivity {
     public Switch alarmPauseSwitch;
     public Switch vibrationAlarmSwitch;
     public String chosenRingtone = "";
+    public String addAlarmHours = "00";
+    public String addAlarmMinutes = "00";
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @SuppressLint("WrongConstant")
@@ -72,6 +77,7 @@ public class AddAlarmActivity extends AppCompatActivity {
                 CharSequence rawSignalName = addAlarmSignalName.getText();
                 String signalName = rawSignalName.toString();
                 boolean isVibrationEnabled = vibrationAlarmSwitch.isChecked();
+                alarmTime = addAlarmHours + ":" + addAlarmMinutes;
                 db.execSQL("INSERT INTO \"alarms\"(time, date, isEnabled, name, sound, isVibrationEnabled) VALUES (\"" + alarmTime + "\", \"" + alarmDate + "\", " + true + ", \"" + signalName + "\", \"" + chosenRingtone + "\", " + isVibrationEnabled + ");");
 
                 Cursor alarmsCursor = db.rawQuery("Select * from alarms", null);
@@ -106,18 +112,53 @@ public class AddAlarmActivity extends AppCompatActivity {
             }
         });
 
-        ScrollView addAlarmTimeInputMinutesScroll = findViewById(R.id.addAlarmTimeInputMinutesScroll);
-        addAlarmTimeInputMinutesScroll.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-            @Override
-            public void onScrollChange(View view, int i, int i1, int i2, int i3) {
-                alarmTime = String.valueOf(i) + ":" + String.valueOf(i1);
-            }
-        });
         ScrollView addAlarmTimeInputHoursScroll = findViewById(R.id.addAlarmTimeInputHoursScroll);
         addAlarmTimeInputHoursScroll.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
             public void onScrollChange(View view, int i, int i1, int i2, int i3) {
-                alarmTime = String.valueOf(i2) + ":" + String.valueOf(i3);
+                LinearLayout hoursColumn = ((LinearLayout) (addAlarmTimeInputHoursScroll.getChildAt(0)));
+                int destinationBetweenScrollItems = 105;
+                int selectedLabelIndex = ((int) (Math.floor(i1 / destinationBetweenScrollItems)));
+                int hoursColumnLabelsCount = hoursColumn.getChildCount();
+                boolean isChildrenAccess = selectedLabelIndex < hoursColumnLabelsCount;
+                if (isChildrenAccess) {
+                    for (int hoursLabelIndex = 1; hoursLabelIndex < hoursColumnLabelsCount; hoursLabelIndex++) {
+                        TextView currentLabel = ((TextView)(hoursColumn.getChildAt(hoursLabelIndex)));
+                        Typeface labelTypeface = Typeface.DEFAULT;
+                        currentLabel.setTypeface(labelTypeface, Typeface.NORMAL);
+                    }
+                    TextView selectedLabel = ((TextView)(hoursColumn.getChildAt(selectedLabelIndex)));
+                    Typeface labelTypeface = selectedLabel.getTypeface();
+                    selectedLabel.setTypeface(labelTypeface, Typeface.BOLD);
+                    CharSequence rawSelectLabelContent = selectedLabel.getText();
+                    String selectLabelContent = rawSelectLabelContent.toString();
+                    addAlarmHours = selectLabelContent;
+                }
+            }
+        });
+
+        ScrollView addAlarmTimeInputMinutesScroll = findViewById(R.id.addAlarmTimeInputMinutesScroll);
+        addAlarmTimeInputMinutesScroll.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View view, int i, int i1, int i2, int i3) {
+                LinearLayout minutesColumn = ((LinearLayout) (addAlarmTimeInputMinutesScroll.getChildAt(0)));
+                int destinationBetweenScrollItems = 109;
+                int selectedLabelIndex = ((int) (Math.floor(i1 / destinationBetweenScrollItems)));
+                int minutesColumnLabelsCount = minutesColumn.getChildCount();
+                boolean isChildrenAccess = selectedLabelIndex < minutesColumnLabelsCount;
+                if (isChildrenAccess) {
+                    for (int minutesLabelIndex = 1; minutesLabelIndex < minutesColumnLabelsCount; minutesLabelIndex++) {
+                        TextView currentLabel = ((TextView)(minutesColumn.getChildAt(minutesLabelIndex)));
+                        Typeface labelTypeface = Typeface.DEFAULT;
+                        currentLabel.setTypeface(labelTypeface, Typeface.NORMAL);
+                    }
+                    TextView selectedLabel = ((TextView)(minutesColumn.getChildAt(selectedLabelIndex)));
+                    Typeface labelTypeface = selectedLabel.getTypeface();
+                    selectedLabel.setTypeface(labelTypeface, Typeface.BOLD);
+                    CharSequence rawSelectLabelContent = selectedLabel.getText();
+                    String selectLabelContent = rawSelectLabelContent.toString();
+                    addAlarmMinutes = selectLabelContent;
+                }
             }
         });
 
