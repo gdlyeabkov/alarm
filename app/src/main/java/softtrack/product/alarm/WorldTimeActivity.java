@@ -10,6 +10,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.media.Image;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -26,8 +27,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
 
 public class WorldTimeActivity  extends Fragment {
 
@@ -151,7 +155,10 @@ public class WorldTimeActivity  extends Fragment {
                 newCityWheatherIcon.setImageResource(R.drawable.weather);
                 newCityWheather.addView(newCityWheatherIcon);
                 TextView newCityWheatherLabel = new TextView(getActivity());
-                newCityWheatherLabel.setText("2°");
+
+                String temp = getWeatherTemperature();
+
+                newCityWheatherLabel.setText(temp);
                 newCityWheather.addView(newCityWheatherLabel);
                 newCity.addView(newCityWheather);
                 cities.addView(newCity);
@@ -161,9 +168,12 @@ public class WorldTimeActivity  extends Fragment {
                 newCity.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Intent intent = new Intent(getActivity(), AddCityActivity.class);
-                        intent.putExtra("id", cityId);
-                        getActivity().startActivity(intent);
+                        boolean isCanEdit = !MainActivity.isSelectionFooter;
+                        if (isCanEdit) {
+                            Intent intent = new Intent(getActivity(), AddCityActivity.class);
+                            intent.putExtra("id", cityId);
+                            getActivity().startActivity(intent);
+                        }
                     }
                 });
                 newCity.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
@@ -203,12 +213,12 @@ public class WorldTimeActivity  extends Fragment {
             citySelector.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    boolean isAlarmUnselected = b;
-                    LinearLayout alarm = ((LinearLayout)(compoundButton.getParent()));
-                    if (isAlarmUnselected) {
-                        alarm.setBackgroundColor(citySelectedBackgroundColor);
+                    boolean isCityUnselected = b;
+                    LinearLayout city = ((LinearLayout)(compoundButton.getParent()));
+                    if (isCityUnselected) {
+                        city.setBackgroundColor(citySelectedBackgroundColor);
                     } else {
-                        alarm.setBackgroundColor(cityInitialBackgroundColor);
+                        city.setBackgroundColor(cityInitialBackgroundColor);
                     }
                 }
             });
@@ -267,6 +277,20 @@ public class WorldTimeActivity  extends Fragment {
         for (int cityIndex = 0; cityIndex < citiesCount; cityIndex++) {
             LinearLayout city = ((LinearLayout)(cities.getChildAt(cityIndex)));
             city.setBackgroundColor(cityInitialBackgroundColor);
+        }
+    }
+
+    public String getWeatherTemperature() {
+        String weatherRoute = "https://api.openweathermap.org/data/2.5/weather?q=Moscow&appid=8ced8d3f02f94ff154bc4ddb60fa72a9&units=metric";
+        try {
+            JSONObject responseJson = new FetchTask<JSONObject>().execute(weatherRoute).get();
+            JSONObject weatherInfo = responseJson.getJSONObject("main");
+            double temp = weatherInfo.getDouble("temp");
+            String rawTemp = String.valueOf(temp);
+            return rawTemp + " °";
+        }
+        catch (Exception e) {
+            return "0 °";
         }
     }
 

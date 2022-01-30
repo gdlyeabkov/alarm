@@ -20,6 +20,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.opengl.Visibility;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +33,13 @@ import android.widget.TextView;
 import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 
+import org.json.JSONObject;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
 @SuppressWarnings("ALL")
@@ -225,7 +232,7 @@ public class MainActivity extends AppCompatActivity {
         alarmFooter.setVisibility(isUnvisible);
         unselectAlarms();
         TextView alarmsTitle = findViewById(R.id.alarmsTitle);
-        alarmsTitle.setText("Все будильники отключены");
+        alarmsTitle.setText("Все будильники\nотключены");
 
         int alarmsCount = alarms.getChildCount();
         for (int alarmIndex = 0; alarmIndex < alarmsCount; alarmIndex++) {
@@ -234,7 +241,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         CheckBox allAlarmsSelector = findViewById(R.id.allAlarmsSelector);
+        allAlarmsSelector.setChecked(false);
         allAlarmsSelector.setVisibility(isUnvisible);
+
+        computeNearAlarm();
 
     }
 
@@ -260,6 +270,63 @@ public class MainActivity extends AppCompatActivity {
 
     public void unselectCities() {
         cities = findViewById(R.id.cities);
+    }
+
+    public void computeNearAlarm() {
+        TextView alarmsTitle = findViewById(R.id.alarmsTitle);
+        ArrayList<HashMap<String, Object>> enabledAlarms = new ArrayList<HashMap<String, Object>>();
+        int countAlarms = alarms.getChildCount();
+        for (int alarmIndex = 0; alarmIndex < countAlarms; alarmIndex++) {
+            LinearLayout alarm = ((LinearLayout)(alarms.getChildAt(alarmIndex)));
+            Switch alarmSwitch = ((Switch)(alarm.getChildAt(1)));
+            boolean isAlarmEnabled = alarmSwitch.isChecked();
+            if (isAlarmEnabled) {
+                HashMap<String, Object> rawAlarm = new HashMap<String, Object>();
+                TextView alarmTimeLabel = ((TextView)(alarm.getChildAt(0)));
+                CharSequence rawAlarmTime = alarmTimeLabel.getText();
+                String alarmTime = rawAlarmTime.toString();
+                rawAlarm.put("time", alarmTime);
+                CharSequence rawAlarmDate = alarmSwitch.getText();
+                String alarmDate = rawAlarmDate.toString();
+                rawAlarm.put("date", alarmDate);
+                enabledAlarms.add(rawAlarm);
+            }
+        }
+        boolean isHaveEnabledAlarms = enabledAlarms.size() >= 1;
+        if (isHaveEnabledAlarms) {
+            String whenAlarmCalled = "1 ч. 1м.";
+            String alarmTime = enabledAlarms.get(0).get("time").toString();
+            String alarmDate = enabledAlarms.get(0).get("date").toString();
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+            String alarmTimeContent = alarmTime;
+            String alarmDateContent = alarmDate;
+            try {
+                Date d1 = sdf.parse(alarmTime);
+                Calendar parsedAlarmDate = Calendar.getInstance();
+                parsedAlarmDate.setTime(d1);
+
+                Date d2 = new Date();
+                d2.setTime(Calendar.getInstance().getTimeInMillis());
+                long endDateMillis = d2.getTime();
+                endDateMillis = System.currentTimeMillis();
+                long difference_In_Time = endDateMillis - d1.getTime();
+                long difference_In_Minutes = (difference_In_Time / (1000 * 60)) % 60;
+                String rawMinutes = String.valueOf(difference_In_Minutes);
+                long difference_In_Hours = (difference_In_Time / (1000 * 60 * 60)) % 24;
+                String rawHours = String.valueOf(difference_In_Hours);
+                alarmTimeContent = rawHours + " ч., " + rawMinutes + " мин.";
+                int dayOfWeekIndex = parsedAlarmDate.get(Calendar.DAY_OF_WEEK) - 1;
+                int rawDayLabel = parsedAlarmDate.get(Calendar.DATE);
+                String dayLabel = String.valueOf(rawDayLabel);
+                int monthIndex = parsedAlarmDate.get(Calendar.MONTH);
+                whenAlarmCalled = "\n" + alarmTimeContent + "\n" + alarmDateContent;
+            } catch (ParseException e) {
+                Log.d("debug", "ошибка парсинга даты будильника");
+            }
+            alarmsTitle.setText("Будильник через " + whenAlarmCalled);
+        } else {
+            alarmsTitle.setText("Все будильники\nотключены");
+        }
     }
 
 }
