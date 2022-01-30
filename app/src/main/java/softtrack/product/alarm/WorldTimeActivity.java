@@ -156,7 +156,7 @@ public class WorldTimeActivity  extends Fragment {
                 newCityWheather.addView(newCityWheatherIcon);
                 TextView newCityWheatherLabel = new TextView(getActivity());
 
-                String temp = getWeatherTemperature();
+                String temp = getWeatherTemperature(cityNameContent);
 
                 newCityWheatherLabel.setText(temp);
                 newCityWheather.addView(newCityWheatherLabel);
@@ -280,8 +280,8 @@ public class WorldTimeActivity  extends Fragment {
         }
     }
 
-    public String getWeatherTemperature() {
-        String weatherRoute = "https://api.openweathermap.org/data/2.5/weather?q=Moscow&appid=8ced8d3f02f94ff154bc4ddb60fa72a9&units=metric";
+    public String getWeatherTemperature(String cityName) {
+        String weatherRoute = "https://api.openweathermap.org/data/2.5/weather?q=" + cityName + "&appid=8ced8d3f02f94ff154bc4ddb60fa72a9&units=metric";
         try {
             JSONObject responseJson = new FetchTask<JSONObject>().execute(weatherRoute).get();
             JSONObject weatherInfo = responseJson.getJSONObject("main");
