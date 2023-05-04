@@ -96,15 +96,6 @@ public class MainActivity extends AppCompatActivity {
                     StartTimerActivity.activityContext.startTimerTitle.setText(MainActivity.timerHours + ":" + MainActivity.timerMinutes + ":" + MainActivity.timerSeconds);
                     StartTimerActivity.activityContext.startTimer();
                 }
-                else {
-                    boolean isStartTimerActivityExists = StartTimerActivity.activityContext != null;
-                    if (isStartTimerActivityExists) {
-                        /*
-                         *  Пытался остановить таймер при каждом переходе на любую вкладку кроме StartTimer но возникает ошибка
-                         */
-                        // StartTimerActivity.activityContext.stopTimer();
-                    }
-                }
             }
         });
 
@@ -146,7 +137,6 @@ public class MainActivity extends AppCompatActivity {
         @NonNull
         @Override
         public Fragment createFragment(int position) {
-            // Hardcoded in this order, you'll want to use lists and make sure the titles match
             if (position == 0) {
                 return new AlarmActivity();
             } else if (position == 1) {
@@ -164,7 +154,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
-            // Hardcoded, use lists
             return 5;
         }
     }
@@ -177,7 +166,6 @@ public class MainActivity extends AppCompatActivity {
         TextView timeLabel = ((TextView)(hoursLabel));
         CharSequence rawTimerHours = timeLabel.getText();
         String parsedRawTimerHours = rawTimerHours.toString();
-        // timerHours = Integer.valueOf(parsedRawTimerHours);
         timerHours = parsedRawTimerHours;
     }
 
@@ -185,7 +173,6 @@ public class MainActivity extends AppCompatActivity {
         TextView timeLabel = ((TextView)(minutesLabel));
         CharSequence rawTimerMinutes = timeLabel.getText();
         String parsedRawTimerMinutes = rawTimerMinutes.toString();
-//        timerMinutes = Integer.valueOf(parsedRawTimerMinutes);
         timerMinutes = parsedRawTimerMinutes;
     }
 
@@ -193,7 +180,6 @@ public class MainActivity extends AppCompatActivity {
         TextView timeLabel = ((TextView)(secondsLabel));
         CharSequence rawTimerSeconds = timeLabel.getText();
         String parsedRawTimerSeconds = rawTimerSeconds.toString();
-//        timerSeconds = Integer.valueOf(parsedRawTimerSeconds);
         timerSeconds = parsedRawTimerSeconds;
     }
 

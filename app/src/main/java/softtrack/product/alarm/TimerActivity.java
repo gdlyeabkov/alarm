@@ -79,7 +79,6 @@ public class TimerActivity  extends Fragment {
                 builder.setPositiveButton("Добавить", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        // TODO добавить таймер в БД
                         CharSequence rawHours = hoursLabel.getText();
                         String hours = rawHours.toString();
                         CharSequence rawMinutes = minutesLabel.getText();
@@ -283,7 +282,6 @@ public class TimerActivity  extends Fragment {
     }
 
     public void activateTimer(Button timer) {
-//        CharSequence rawTimerTime = timer.getText();
         CharSequence rawTimerTime = timer.getContentDescription();
         String timerTime = rawTimerTime.toString();
 

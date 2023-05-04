@@ -129,10 +129,6 @@ public class StartTimerActivity extends Fragment {
             startTimerTitle.setText(currentTime);
             boolean isTimerEnd = hours < 0 || minutes < 0 || seconds < 0;
             if (isTimerEnd) {
-                /*
-                 *  Пытался остановить таймер когда время таймера истекло но возникает ошибка
-                 */
-                // stopTimer();
                 MainActivity.viewPager.setCurrentItem(3);
             }
         };
